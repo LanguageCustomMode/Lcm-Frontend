@@ -12,7 +12,7 @@ Stub outline:
 - Append opening_message to messages.
 - On send: POST /llm/interact/{session_id}/message and stream SSE tokens + corrections.
 - Surface corrections/errors inline in the chat UI.
-- End session: POST /llm/interact/{session_id}/end with summary and errors.
+- End session: POST /llm/interact/{session_id}/end (no body) -> { summary, errors_collected, xp_earned }.
 -->
 <h1>Practice</h1>
 <ChatWindow {messages} />
