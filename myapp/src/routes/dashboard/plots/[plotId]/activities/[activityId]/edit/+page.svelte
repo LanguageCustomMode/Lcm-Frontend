@@ -5,4 +5,10 @@
 </script>
 
 <!-- TODO: Load activity from API -->
+<!--
+Stub outline:
+- GET /activities/{activity_id} for initial data.
+- ActivityEditor on save: PATCH /activities/{activity_id}.
+- Offer delete/archive action.
+-->
 <h1>Edit Activity</h1>

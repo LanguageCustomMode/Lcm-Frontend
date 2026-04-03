@@ -5,6 +5,12 @@
 </script>
 
 <!-- TODO: Sidebar with plot list, user info, navigation -->
+<!--
+Stub outline:
+- Show profile (username, level, xp) from load data.
+- Render plot list for quick switching.
+- Add "New Plot" action and logout button.
+-->
 <div class="dashboard-layout">
 	<aside class="sidebar">
 		<h2>LanguageFarm</h2>

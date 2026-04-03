@@ -3,5 +3,11 @@
 </script>
 
 <!-- TODO: Extension selection + redirect to design chat -->
+<!--
+Stub outline:
+- GET /activities/{activity_id}/extensions -> list of target_type options.
+- Render selection list; on choose, POST /activities/{activity_id}/extend.
+- Backend returns design conversation context; redirect to design chat.
+-->
 <h1>Extend Activity</h1>
 <p>Choose an extension type to create a new related activity.</p>

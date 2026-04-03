@@ -6,5 +6,13 @@
 </script>
 
 <!-- TODO: Interaction tutor with SSE streaming -->
+<!--
+Stub outline:
+- Start session: POST /llm/interact/{activity_id}/start -> { session_id, opening_message }.
+- Append opening_message to messages.
+- On send: POST /llm/interact/{session_id}/message and stream SSE tokens + corrections.
+- Surface corrections/errors inline in the chat UI.
+- End session: POST /llm/interact/{session_id}/end with summary and errors.
+-->
 <h1>Practice</h1>
 <ChatWindow {messages} />

@@ -11,6 +11,13 @@
 </script>
 
 <!-- TODO: Card flip animation + rating buttons -->
+<!--
+Stub outline:
+- Click/tap flips card (showAnswer = true).
+- Rating buttons map to 1..4 (Again/Hard/Good/Easy).
+- onrate(rating) emits for parent review session.
+- Keyboard shortcuts: 1-4 for ratings, space to flip.
+-->
 <div class="flashcard">
 	<div class="flashcard-front">{card.front}</div>
 	{#if showAnswer}

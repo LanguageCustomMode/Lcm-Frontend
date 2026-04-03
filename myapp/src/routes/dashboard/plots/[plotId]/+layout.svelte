@@ -3,6 +3,12 @@
 </script>
 
 <!-- TODO: Plot-level navigation (grid, settings, composition, references, design) -->
+<!--
+Stub outline:
+- Highlight active tab.
+- Show quick stats (due cards, ripeness) from plot data.
+- Add "Create Activity" shortcut.
+-->
 <nav class="plot-nav">
 	<a href="/dashboard/plots/{data.plot.id}">Grid</a>
 	<a href="/dashboard/plots/{data.plot.id}/composition">Composition</a>
