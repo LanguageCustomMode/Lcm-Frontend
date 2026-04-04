@@ -48,7 +48,7 @@
 			)) {
 				console.debug('[interact] sse event', event);
 				if (event.event === 'token') {
-					buffer = `${buffer}${buffer ? ' ' : ''}${event.data}`;
+					buffer += event.data;
 					messages = messages.map((msg, idx) =>
 						idx === assistantIndex ? { ...msg, content: buffer } : msg
 					);
@@ -101,7 +101,7 @@
 				{/each}
 			</ul>
 		{/if}
-		<button type="button" on:click={endSession}>End Session</button>
+		<button type="button" onclick={endSession}>End Session</button>
 	</div>
 </div>
 

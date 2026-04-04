@@ -72,7 +72,7 @@
 			)) {
 				console.debug('[design] sse event', event);
 				if (event.event === 'token') {
-					buffer = `${buffer}${buffer ? ' ' : ''}${event.data}`;
+					buffer += event.data;
 					messages = messages.map((msg, idx) =>
 						idx === assistantIndex ? { ...msg, content: buffer } : msg
 					);
