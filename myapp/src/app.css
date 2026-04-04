@@ -1,0 +1,24 @@
+/* Global styles — to be expanded */
+:root {
+	--color-bg: #fafaf8;
+	--color-text: #1a1a1a;
+	--color-primary: #4a7c59;
+	--color-primary-light: #6ba368;
+	--color-accent: #e8a838;
+	--color-border: #ddd;
+	--radius: 8px;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family: system-ui, -apple-system, sans-serif;
+	background: var(--color-bg);
+	color: var(--color-text);
+}
