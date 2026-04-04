@@ -36,8 +36,17 @@
 		return map;
 	});
 
-	const rowsArray = $derived(() => Array.from({ length: rows }, (_, index) => index));
-	const colsArray = $derived(() => Array.from({ length: cols }, (_, index) => index));
+	const safeRows = $derived(() => {
+		const value = Number(rows ?? 0);
+		return Number.isFinite(value) ? Math.max(0, value) : 0;
+	});
+	const safeCols = $derived(() => {
+		const value = Number(cols ?? 0);
+		return Number.isFinite(value) ? Math.max(0, value) : 0;
+	});
+
+	const rowsArray = $derived(() => Array.from({ length: safeRows }, (_, index) => index));
+	const colsArray = $derived(() => Array.from({ length: safeCols }, (_, index) => index));
 
 	const handleCellClick = (row: number, col: number) => {
 		const activity = activityByCell.get(key(row, col));
@@ -50,10 +59,10 @@
 </script>
 
 <div class="farm-grid">
-	{#if rows === 0 || cols === 0}
+	{#if safeRows === 0 || safeCols === 0}
 		<p class="empty">No grid configured.</p>
 	{:else}
-		<div class="grid" style={`grid-template-columns: repeat(${cols}, minmax(120px, 1fr));`}>
+		<div class="grid" style={`grid-template-columns: repeat(${safeCols}, minmax(120px, 1fr));`}>
 			{#each rowsArray as r}
 				{#each colsArray as c}
 					{#key `${r}-${c}`}
