@@ -26,7 +26,8 @@ export function connectSSE(
 
 export async function* fetchSSE(
 	url: string,
-	options?: RequestInit
+	options?: RequestInit,
+	debug = false
 ): AsyncGenerator<SSEEvent, void, unknown> {
 	const response = await fetch(url, {
 		...options,
@@ -35,6 +36,14 @@ export async function* fetchSSE(
 			...(options?.headers ?? {})
 		}
 	});
+	if (debug) {
+		console.debug('[sse] response', {
+			url,
+			status: response.status,
+			ok: response.ok,
+			contentType: response.headers.get('content-type')
+		});
+	}
 	if (!response.ok) {
 		const text = await response.text();
 		throw new Error(text || `SSE request failed (${response.status})`);
@@ -49,22 +58,29 @@ export async function* fetchSSE(
 		const { value, done } = await reader.read();
 		if (done) break;
 		buffer += decoder.decode(value, { stream: true });
+		// Normalize CRLF to LF so we can reliably split on \n\n boundaries.
+		if (buffer.includes('\r')) {
+			buffer = buffer.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+		}
+		if (debug) {
+			console.debug('[sse] chunk', { len: value?.length ?? 0 });
+		}
 		let idx = buffer.indexOf('\n\n');
 		while (idx >= 0) {
 			const chunk = buffer.slice(0, idx);
 			buffer = buffer.slice(idx + 2);
-			const event = parseSseChunk(chunk);
+			const event = parseSseChunk(chunk, debug);
 			if (event) yield event;
 			idx = buffer.indexOf('\n\n');
 		}
 	}
 	if (buffer.trim().length > 0) {
-		const event = parseSseChunk(buffer);
+		const event = parseSseChunk(buffer, debug);
 		if (event) yield event;
 	}
 }
 
-function parseSseChunk(chunk: string): SSEEvent | null {
+function parseSseChunk(chunk: string, debug = false): SSEEvent | null {
 	const lines = chunk.split('\n').map((line) => line.trim());
 	let event = 'message';
 	const dataLines: string[] = [];
@@ -79,5 +95,12 @@ function parseSseChunk(chunk: string): SSEEvent | null {
 		}
 	}
 	if (!dataLines.length) return null;
-	return { event, data: dataLines.join('\n') };
+	const data = dataLines.join('\n');
+	if (debug) {
+		console.debug('[sse] event', {
+			event,
+			dataPreview: data.length > 200 ? `${data.slice(0, 200)}...(truncated)` : data
+		});
+	}
+	return { event, data };
 }

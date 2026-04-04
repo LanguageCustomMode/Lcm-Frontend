@@ -36,11 +36,17 @@
 		loading = true;
 
 		try {
-			for await (const event of fetchSSE(`/api/llm/interact/${sessionId}/message`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ message })
-			})) {
+			console.debug('[interact] sendMessage', { sessionId, messageLen: message.length });
+			for await (const event of fetchSSE(
+				`/api/llm/interact/${sessionId}/message`,
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ message })
+				},
+				true
+			)) {
+				console.debug('[interact] sse event', event);
 				if (event.event === 'token') {
 					buffer = `${buffer}${buffer ? ' ' : ''}${event.data}`;
 					messages = messages.map((msg, idx) =>
