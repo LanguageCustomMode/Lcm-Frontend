@@ -34,7 +34,7 @@
 				<div class="bar-row">
 					<span>{label}</span>
 					<div class="bar">
-						<div class="fill" style={`width: ${(value / total) * 100}%`}></div>
+						<div class="fill" style={`width: ${(value / total()) * 100}%`}></div>
 					</div>
 					<span class="value">{value}</span>
 				</div>
@@ -51,7 +51,7 @@
 				<div class="bar-row">
 					<span>{label}</span>
 					<div class="bar">
-						<div class="fill accent" style={`width: ${(value / total) * 100}%`}></div>
+						<div class="fill accent" style={`width: ${(value / total()) * 100}%`}></div>
 					</div>
 					<span class="value">{value}</span>
 				</div>

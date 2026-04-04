@@ -45,34 +45,36 @@
 		return Number.isFinite(value) ? Math.max(0, value) : 0;
 	});
 
-	const rowsArray = $derived(() => Array.from({ length: safeRows }, (_, index) => index));
-	const colsArray = $derived(() => Array.from({ length: safeCols }, (_, index) => index));
+	const rowsArray = $derived(() => Array.from({ length: safeRows() }, (_, index) => index));
+	const colsArray = $derived(() => Array.from({ length: safeCols() }, (_, index) => index));
 
 	const handleCellClick = (row: number, col: number) => {
-		const activity = activityByCell.get(key(row, col));
+		const activity = activityByCell().get(key(row, col));
 		if (activity) {
 			onactivityclick?.(activity);
 			return;
 		}
 		oncellclick?.(row, col);
 	};
+
+	console.log('safeRows, safeCols, rowsArray, colsArray', safeRows(), safeCols(), rowsArray(), colsArray());
 </script>
 
 <div class="farm-grid">
-	{#if safeRows === 0 || safeCols === 0}
+	{#if safeRows() === 0 || safeCols() === 0}
 		<p class="empty">No grid configured.</p>
 	{:else}
-		<div class="grid" style={`grid-template-columns: repeat(${safeCols}, minmax(120px, 1fr));`}>
-			{#each rowsArray as r}
-				{#each colsArray as c}
+		<div class="grid" style={`grid-template-columns: repeat(${safeCols()}, minmax(120px, 1fr));`}>
+			{#each rowsArray() as r}
+				{#each colsArray() as c}
 					{#key `${r}-${c}`}
 						<div class="cell" on:click={() => handleCellClick(r, c)}>
-							{#if activityByCell.get(key(r, c))}
-								{#if anchorByActivity.get(activityByCell.get(key(r, c))!.id) === key(r, c)}
+							{#if activityByCell().get(key(r, c))}
+								{#if anchorByActivity().get(activityByCell().get(key(r, c))!.id) === key(r, c)}
 									<ActivityTile
-										activity={activityByCell.get(key(r, c))!}
-										ripeness={(activityByCell.get(key(r, c)) as any)?.stats?.ripeness ?? 0}
-										onclick={() => onactivityclick?.(activityByCell.get(key(r, c))!)}
+										activity={activityByCell().get(key(r, c))!}
+										ripeness={(activityByCell().get(key(r, c)) as any)?.stats?.ripeness ?? 0}
+										onclick={() => onactivityclick?.(activityByCell().get(key(r, c))!)}
 									/>
 								{:else}
 									<div class="merged"></div>

@@ -38,10 +38,10 @@
 		return list;
 	});
 
-	const pageCount = $derived(() => Math.max(1, Math.ceil(filteredCards.length / pageSize)));
+	const pageCount = $derived(() => Math.max(1, Math.ceil(filteredCards().length / pageSize)));
 	const pagedCards = $derived(() => {
 		const start = (page - 1) * pageSize;
-		return filteredCards.slice(start, start + pageSize);
+		return filteredCards().slice(start, start + pageSize);
 	});
 
 	const loadCards = async () => {
@@ -172,7 +172,7 @@
 
 	{#if loading}
 		<p>Loading cards...</p>
-	{:else if pagedCards.length === 0}
+	{:else if pagedCards().length === 0}
 		<p>No cards found.</p>
 	{:else}
 		<table>
@@ -186,7 +186,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each pagedCards as card}
+				{#each pagedCards() as card}
 					<tr>
 						<td>
 							{#if editingId === card.id}
@@ -218,11 +218,11 @@
 		<button type="button" on:click={() => (page = Math.max(1, page - 1))} disabled={page === 1}>
 			Previous
 		</button>
-		<span>Page {page} of {pageCount}</span>
+		<span>Page {page} of {pageCount()}</span>
 		<button
 			type="button"
-			on:click={() => (page = Math.min(pageCount, page + 1))}
-			disabled={page === pageCount}
+			on:click={() => (page = Math.min(pageCount(), page + 1))}
+			disabled={page === pageCount()}
 		>
 			Next
 		</button>
