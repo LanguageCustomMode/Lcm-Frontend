@@ -81,7 +81,9 @@
 					try {
 						suggestion = JSON.parse(event.data);
 					} catch {
-						suggestion = { raw: event.data };
+						console.error('[design] failed to parse suggestion JSON', event.data);
+						error = 'Failed to parse activity suggestion from server';
+						suggestion = null;
 					}
 				}
 				if (event.event === 'done') {
