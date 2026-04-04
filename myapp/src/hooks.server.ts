@@ -40,6 +40,9 @@ const apiProxyHandle: Handle = async ({ event, resolve }) => {
 		const headers = new Headers(event.request.headers);
 		if (session?.access_token) {
 			headers.set('Authorization', `Bearer ${session.access_token}`);
+			console.info(`[api-proxy] Using access token: ${session.access_token}`);
+		} else {
+			console.warn(`[api-proxy] Missing session for ${event.url.pathname}`);
 		}
 		headers.delete('host');
 
@@ -50,6 +53,12 @@ const apiProxyHandle: Handle = async ({ event, resolve }) => {
 				? await event.request.arrayBuffer()
 				: undefined
 		});
+
+		if (response.status === 401 || response.status === 403) {
+			console.warn(`[api-proxy] ${response.status} from backend for ${backendPath}`);
+		} else if (response.status >= 500) {
+			console.error(`[api-proxy] ${response.status} from backend for ${backendPath}`);
+		}
 
 		return new Response(response.body, {
 			status: response.status,
@@ -67,6 +76,7 @@ const authGuardHandle: Handle = async ({ event, resolve }) => {
 	event.locals.user = user;
 
 	if (event.url.pathname.startsWith('/dashboard') && !session) {
+		console.warn(`[auth-guard] No session for ${event.url.pathname}`);
 		throw redirect(303, '/auth/login');
 	}
 
