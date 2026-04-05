@@ -51,7 +51,10 @@
 				body = JSON.stringify({ text, title: title || 'Untitled reference' });
 			}
 
-			const res = await fetch(`/api/plots/${data.plot.id}/references`, {
+			const endpoint = file
+				? `/api/plots/${data.plot.id}/references/upload`
+				: `/api/plots/${data.plot.id}/references`;
+			const res = await fetch(endpoint, {
 				method: 'POST',
 				headers,
 				body
