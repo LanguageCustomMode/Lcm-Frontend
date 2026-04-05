@@ -11,7 +11,13 @@
 	let uploading = $state(false);
 	let title = $state('');
 	let text = $state('');
+	let file = $state<File | null>(null);
 	let error = $state<string | null>(null);
+
+	const handleFileChange = (event: Event) => {
+		const input = event.target as HTMLInputElement;
+		file = input?.files?.[0] ?? null;
+	};
 
 	const loadReferences = async () => {
 		if (!data.plot) return;
@@ -24,13 +30,11 @@
 		}
 	};
 
-	const uploadReference = async (event: Event) => {
+	const uploadReference = async () => {
 		if (!data.plot) return;
 		uploading = true;
 		error = null;
 		try {
-			const input = event.target as HTMLInputElement;
-			const file = input?.files?.[0];
 			let body: BodyInit;
 			let headers: Record<string, string> = {};
 
@@ -55,6 +59,7 @@
 			if (!res.ok) throw new Error(await res.text());
 			title = '';
 			text = '';
+			file = null;
 			await loadReferences();
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to upload reference';
@@ -112,7 +117,7 @@
 		</label>
 		<label class="file">
 			Upload file
-			<input type="file" accept=".txt,.md,.pdf" on:change={uploadReference} />
+			<input type="file" accept=".txt,.md,.pdf" on:change={handleFileChange} />
 		</label>
 		<button type="button" disabled={uploading} on:click={uploadReference}>
 			{uploading ? 'Uploading...' : 'Upload Reference'}
