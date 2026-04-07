@@ -6,6 +6,8 @@
 	import type { Card, ReviewSummary as ReviewSummaryType } from '$lib/types';
 	import { page } from '$app/stores';
 
+	const MAX_ROUNDS = 10;
+
 	let { data } = $props();
 
 	let cards = $state<Card[]>([]);
@@ -17,14 +19,19 @@
 	let reviewStartedAt = $state<number | null>(null);
 	let reviews = $state<{ card_id: string; rating: 1 | 2 | 3 | 4; time_ms: number }[]>([]);
 
-	const startSession = async () => {
+	let roundNumber = $state(1);
+	let totalReviewedAccum = $state(0);
+	let correctAccum = $state(0);
+	let xpAccum = $state(0);
+
+	const startSession = async (includeNew: boolean = true) => {
 		loading = true;
 		error = null;
 		try {
 			const res = await fetch(`/api/activities/${$page.params.activityId}/review-session`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({})
+				body: JSON.stringify({ include_new: includeNew })
 			});
 			if (!res.ok) throw new Error(await res.text());
 			const payload = await res.json();
@@ -46,17 +53,30 @@
 		if (!card) return;
 		const timeMs = reviewStartedAt ? Math.round(performance.now() - reviewStartedAt) : 0;
 		reviewStartedAt = performance.now();
-		cards[currentIndex] = card;
 		reviews = [...reviews, { card_id: card.id, rating, time_ms: timeMs }];
 		try {
 			if (currentIndex === cards.length - 1) {
 				const res = await fetch(`/api/review-sessions/${sessionId}/complete`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ reviews })
+					body: JSON.stringify({ activity_id: $page.params.activityId, reviews })
 				});
 				if (!res.ok) throw new Error(await res.text());
-				summary = await res.json();
+				const roundSummary: ReviewSummaryType = await res.json();
+
+				totalReviewedAccum += roundSummary.total_reviewed;
+				xpAccum += roundSummary.xp_earned;
+				correctAccum += reviews.filter((r) => r.rating >= 3).length;
+
+				if ((roundSummary.remaining_due ?? 0) > 0 && roundNumber < MAX_ROUNDS) {
+					roundNumber += 1;
+					await startSession(false);
+					if (cards.length === 0) {
+						showFinalSummary();
+					}
+				} else {
+					showFinalSummary();
+				}
 			} else {
 				currentIndex += 1;
 			}
@@ -64,6 +84,14 @@
 			error = err instanceof Error ? err.message : 'Failed to submit review';
 		}
 	};
+
+	function showFinalSummary() {
+		summary = {
+			total_reviewed: totalReviewedAccum,
+			xp_earned: xpAccum,
+			accuracy: totalReviewedAccum > 0 ? correctAccum / totalReviewedAccum : 0
+		};
+	}
 
 	onMount(startSession);
 </script>
@@ -77,6 +105,9 @@
 {:else if summary}
 	<ReviewSummary {summary} />
 {:else if cards.length > 0}
+	{#if roundNumber > 1}
+		<p class="round-label">Round {roundNumber}</p>
+	{/if}
 	<ReviewProgress current={currentIndex + 1} total={cards.length} />
 	<FlashcardReview card={cards[currentIndex]} onrate={rateCard} />
 {:else}
@@ -86,5 +117,10 @@
 <style>
 	.error {
 		color: #b42318;
+	}
+	.round-label {
+		font-size: 0.875rem;
+		color: #666;
+		margin-bottom: 0.25rem;
 	}
 </style>

@@ -20,4 +20,5 @@ export interface ReviewSummary {
 	xp_earned: number;
 	accuracy: number;
 	next_review_at?: string;
+	remaining_due?: number;
 }
