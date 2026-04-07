@@ -1,17 +1,17 @@
 <script lang="ts">
-	import type { Card } from '$lib/types';
+	import type { ContentItem } from '$lib/types';
 	import CardEditor from '$lib/components/activity/CardEditor.svelte';
 
 	interface Props {
-		cards?: Card[];
+		items?: ContentItem[];
 		activityId?: string;
-		onedit?: (card: Card) => void;
-		ondelete?: (cardId: string) => void;
+		onedit?: (item: ContentItem) => void;
+		ondelete?: (itemId: string) => void;
 	}
 
-	let { cards: initialCards = [], activityId, onedit, ondelete }: Props = $props();
+	let { items: initialItems = [], activityId, onedit, ondelete }: Props = $props();
 
-	let cards = $state<Card[]>(initialCards);
+	let items = $state<ContentItem[]>(initialItems);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let status = $state<'due' | 'new' | 'learning' | 'review' | 'all'>('all');
@@ -21,100 +21,104 @@
 	let editingId = $state<string | null>(null);
 	let creating = $state(false);
 
-	const filteredCards = $derived(() => {
-		let list = [...cards];
+	// Separate notes from SRS-eligible items
+	const notes = $derived(() =>
+		items.filter((it) => it.content_type === 'note')
+	);
+
+	const srsItems = $derived(() =>
+		items.filter((it) => it.content_type !== 'note' && it.content_type !== 'knowledge_component')
+	);
+
+	const filteredItems = $derived(() => {
+		let list = [...srsItems()];
 		if (status !== 'all') {
-			list = list.filter((card) => cardState(card.state) === status);
-		}
-		if (sort === 'due') {
-			list.sort((a, b) => new Date(a.due).getTime() - new Date(b.due).getTime());
-		}
-		if (sort === 'created') {
-			list.sort((a, b) => a.id.localeCompare(b.id));
-		}
-		if (sort === 'difficulty') {
-			list.sort((a, b) => (b as any).difficulty - (a as any).difficulty);
+			list = list.filter((item) => {
+				const srs = item.srs_records;
+				if (!srs) return false;
+				return itemState(srs.state) === status;
+			});
 		}
 		return list;
 	});
 
-	const pageCount = $derived(() => Math.max(1, Math.ceil(filteredCards().length / pageSize)));
-	const pagedCards = $derived(() => {
+	const pageCount = $derived(() => Math.max(1, Math.ceil(filteredItems().length / pageSize)));
+	const pagedItems = $derived(() => {
 		const start = (page - 1) * pageSize;
-		return filteredCards().slice(start, start + pageSize);
+		return filteredItems().slice(start, start + pageSize);
 	});
 
-	const loadCards = async () => {
+	const loadItems = async () => {
 		if (!activityId) return;
 		loading = true;
 		error = null;
 		try {
 			const query = new URLSearchParams();
-			if (status !== 'all') query.set('status', status);
-			query.set('limit', String(pageSize));
-			const res = await fetch(`/api/activities/${activityId}/cards?${query.toString()}`);
+			query.set('limit', String(200));
+			const res = await fetch(`/api/activities/${activityId}/content?${query.toString()}`);
 			if (!res.ok) throw new Error(await res.text());
-			cards = await res.json();
+			items = await res.json();
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to load cards';
+			error = err instanceof Error ? err.message : 'Failed to load content';
 		} finally {
 			loading = false;
 		}
 	};
 
-	const cardState = (state: number) => {
+	const itemState = (state: number) => {
 		if (state === 0) return 'new';
 		if (state === 1) return 'learning';
 		if (state === 2) return 'review';
 		return 'due';
 	};
 
-	const handleSave = async (payload: { front: string; back: string; extra_fields?: Record<string, unknown> }) => {
+	const getDisplayText = (item: ContentItem): { primary: string; secondary: string } => {
+		const c = item.content as Record<string, unknown>;
+		switch (item.content_type) {
+			case 'card':
+			case 'error':
+			case 'audio_card':
+				return { primary: String(c.front ?? ''), secondary: String(c.back ?? '') };
+			case 'mcq':
+				return { primary: String(c.question ?? ''), secondary: `${(c.answers as string[])?.length ?? 0} answers` };
+			case 'wildcard':
+				return { primary: String(c.text ?? ''), secondary: 'wildcard' };
+			case 'sentence':
+				return { primary: String(c.sentence ?? ''), secondary: 'sentence' };
+			default:
+				return { primary: JSON.stringify(c).slice(0, 60), secondary: item.content_type };
+		}
+	};
+
+	const handleSave = async (payload: { front: string; back: string }) => {
 		if (!activityId) return;
 		try {
-			const res = await fetch(`/api/activities/${activityId}/cards`, {
+			const res = await fetch(`/api/activities/${activityId}/content`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ cards: [payload] })
+				body: JSON.stringify({
+					items: [{ content_type: 'card', content: payload }]
+				})
 			});
 			if (!res.ok) throw new Error(await res.text());
-			await loadCards();
+			await loadItems();
 			creating = false;
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to save card';
+			error = err instanceof Error ? err.message : 'Failed to save';
 		}
 	};
 
-	const handleEdit = async (card: Card, payload: { front: string; back: string }) => {
-		if (onedit) {
-			onedit(card);
-			return;
-		}
-		try {
-			const res = await fetch(`/api/cards/${card.id}`, {
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(payload)
-			});
-			if (!res.ok) throw new Error(await res.text());
-			await loadCards();
-			editingId = null;
-		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to update card';
-		}
-	};
-
-	const handleDelete = async (card: Card) => {
+	const handleDelete = async (item: ContentItem) => {
 		if (ondelete) {
-			ondelete(card.id);
+			ondelete(item.id);
 			return;
 		}
 		try {
-			const res = await fetch(`/api/cards/${card.id}`, { method: 'DELETE' });
+			const res = await fetch(`/api/content/${item.id}`, { method: 'DELETE' });
 			if (!res.ok) throw new Error(await res.text());
-			await loadCards();
+			await loadItems();
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to delete card';
+			error = err instanceof Error ? err.message : 'Failed to delete';
 		}
 	};
 
@@ -122,13 +126,26 @@
 		const _status = status;
 		const _pageSize = pageSize;
 		page = 1;
-		if (activityId) loadCards();
+		if (activityId) loadItems();
 	});
 </script>
 
 <div class="activity-browser">
+	<!-- Notes section -->
+	{#if notes().length > 0}
+		<div class="notes-section">
+			<h3>Notes</h3>
+			{#each notes() as note}
+				<div class="note-content">
+					{@html (note.content as Record<string, unknown>).text ?? ''}
+				</div>
+			{/each}
+		</div>
+	{/if}
+
+	<!-- SRS content items -->
 	<div class="header">
-		<h3>Cards</h3>
+		<h3>Content</h3>
 		<div class="controls">
 			<label>
 				Status
@@ -171,42 +188,30 @@
 	{/if}
 
 	{#if loading}
-		<p>Loading cards...</p>
-	{:else if pagedCards().length === 0}
-		<p>No cards found.</p>
+		<p>Loading content...</p>
+	{:else if pagedItems().length === 0}
+		<p>No content found.</p>
 	{:else}
 		<table>
 			<thead>
 				<tr>
-					<th>Front</th>
-					<th>Back</th>
+					<th>Type</th>
+					<th>Primary</th>
+					<th>Secondary</th>
 					<th>Status</th>
-					<th>Due</th>
 					<th></th>
 				</tr>
 			</thead>
 			<tbody>
-				{#each pagedCards() as card}
+				{#each pagedItems() as item}
+					{@const display = getDisplayText(item)}
 					<tr>
-						<td>
-							{#if editingId === card.id}
-								<CardEditor
-									card={card}
-									onsave={(payload) => handleEdit(card, payload)}
-									oncancel={() => (editingId = null)}
-								/>
-							{:else}
-								{card.front}
-							{/if}
-						</td>
-						<td>{editingId === card.id ? '' : card.back}</td>
-						<td>{cardState(card.state)}</td>
-						<td>{new Date(card.due).toLocaleDateString()}</td>
+						<td class="type-badge">{item.content_type}</td>
+						<td>{display.primary}</td>
+						<td>{display.secondary}</td>
+						<td>{item.srs_records ? itemState(item.srs_records.state) : '—'}</td>
 						<td class="row-actions">
-							{#if editingId !== card.id}
-								<button type="button" on:click={() => (editingId = card.id)}>Edit</button>
-								<button type="button" on:click={() => handleDelete(card)}>Delete</button>
-							{/if}
+							<button type="button" on:click={() => handleDelete(item)}>Delete</button>
 						</td>
 					</tr>
 				{/each}
@@ -237,6 +242,21 @@
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius);
 		padding: 1rem;
+	}
+
+	.notes-section {
+		border-bottom: 1px solid var(--color-border);
+		padding-bottom: 1rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.note-content {
+		font-size: 0.9rem;
+		line-height: 1.6;
+		padding: 0.75rem;
+		background: #fafaf8;
+		border-radius: var(--radius);
+		white-space: pre-wrap;
 	}
 
 	.header {
@@ -289,6 +309,13 @@
 		border-bottom: 1px solid #eee;
 		padding: 0.5rem;
 		vertical-align: top;
+	}
+
+	.type-badge {
+		font-size: 0.7rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		color: #666;
 	}
 
 	.row-actions {

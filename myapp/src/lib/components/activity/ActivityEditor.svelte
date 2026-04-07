@@ -11,7 +11,6 @@
 
 	let name = $state(activity.name);
 	let type = $state(activity.type);
-	let subtype = $state(activity.subtype ?? '');
 	let cardCap = $state((activity as any).card_cap ?? '');
 	let config = $state(JSON.stringify(activity.config ?? {}, null, 2));
 
@@ -25,7 +24,6 @@
 		onsave?.({
 			name,
 			type,
-			subtype: subtype || undefined,
 			config: parsedConfig,
 			...(cardCap !== '' ? { card_cap: Number(cardCap) } : {})
 		} as Partial<Activity>);
@@ -56,10 +54,6 @@
 		<label>
 			Type
 			<input bind:value={type} disabled />
-		</label>
-		<label>
-			Subtype
-			<input bind:value={subtype} placeholder="Optional" />
 		</label>
 		<label>
 			Card Cap

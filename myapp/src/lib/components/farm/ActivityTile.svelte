@@ -37,9 +37,6 @@
 	<div class="title">{activity.name}</div>
 	<div class="meta">
 		<span class="badge">{formatType(activity.type)}</span>
-		{#if activity.subtype}
-			<span class="badge subtle">{formatType(activity.subtype)}</span>
-		{/if}
 	</div>
 	{#if (activity as any).stats}
 		<div class="stats">

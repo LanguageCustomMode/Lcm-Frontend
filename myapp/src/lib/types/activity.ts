@@ -19,7 +19,6 @@ export interface Activity {
 	plot_id: string;
 	name: string;
 	type: ActivityType;
-	subtype?: string;
 	config: Record<string, unknown>;
 	grid_positions: [number, number][];
 	parent_activity_id?: string;

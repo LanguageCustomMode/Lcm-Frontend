@@ -3,21 +3,21 @@
 	import ReviewProgress from '$lib/components/review/ReviewProgress.svelte';
 	import ReviewSummary from '$lib/components/review/ReviewSummary.svelte';
 	import { onMount } from 'svelte';
-	import type { Card, ReviewSummary as ReviewSummaryType } from '$lib/types';
+	import type { ContentItem, ReviewSummary as ReviewSummaryType } from '$lib/types';
 	import { page } from '$app/stores';
 
 	const MAX_ROUNDS = 10;
 
 	let { data } = $props();
 
-	let cards = $state<Card[]>([]);
+	let items = $state<ContentItem[]>([]);
 	let sessionId = $state<string | null>(null);
 	let currentIndex = $state(0);
 	let loading = $state(false);
 	let summary = $state<ReviewSummaryType | null>(null);
 	let error = $state<string | null>(null);
 	let reviewStartedAt = $state<number | null>(null);
-	let reviews = $state<{ card_id: string; rating: 1 | 2 | 3 | 4; time_ms: number }[]>([]);
+	let reviews = $state<{ content_item_id: string; rating: 1 | 2 | 3 | 4; time_ms: number }[]>([]);
 
 	let roundNumber = $state(1);
 	let totalReviewedAccum = $state(0);
@@ -35,7 +35,7 @@
 			});
 			if (!res.ok) throw new Error(await res.text());
 			const payload = await res.json();
-			cards = payload.cards ?? [];
+			items = payload.items ?? [];
 			sessionId = payload.session_id;
 			currentIndex = 0;
 			reviews = [];
@@ -47,15 +47,15 @@
 		}
 	};
 
-	const rateCard = async (rating: 1 | 2 | 3 | 4) => {
+	const rateItem = async (rating: 1 | 2 | 3 | 4) => {
 		if (!sessionId) return;
-		const card = cards[currentIndex];
-		if (!card) return;
+		const item = items[currentIndex];
+		if (!item) return;
 		const timeMs = reviewStartedAt ? Math.round(performance.now() - reviewStartedAt) : 0;
 		reviewStartedAt = performance.now();
-		reviews = [...reviews, { card_id: card.id, rating, time_ms: timeMs }];
+		reviews = [...reviews, { content_item_id: item.id, rating, time_ms: timeMs }];
 		try {
-			if (currentIndex === cards.length - 1) {
+			if (currentIndex === items.length - 1) {
 				const res = await fetch(`/api/review-sessions/${sessionId}/complete`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
@@ -71,7 +71,7 @@
 				if ((roundSummary.remaining_due ?? 0) > 0 && roundNumber < MAX_ROUNDS) {
 					roundNumber += 1;
 					await startSession(false);
-					if (cards.length === 0) {
+					if (items.length === 0) {
 						showFinalSummary();
 					}
 				} else {
@@ -104,14 +104,14 @@
 	<p>Loading review session...</p>
 {:else if summary}
 	<ReviewSummary {summary} />
-{:else if cards.length > 0}
+{:else if items.length > 0}
 	{#if roundNumber > 1}
 		<p class="round-label">Round {roundNumber}</p>
 	{/if}
-	<ReviewProgress current={currentIndex + 1} total={cards.length} />
-	<FlashcardReview card={cards[currentIndex]} onrate={rateCard} />
+	<ReviewProgress current={currentIndex + 1} total={items.length} />
+	<FlashcardReview item={items[currentIndex]} onrate={rateItem} />
 {:else}
-	<p>No cards to review.</p>
+	<p>No items to review.</p>
 {/if}
 
 <style>
