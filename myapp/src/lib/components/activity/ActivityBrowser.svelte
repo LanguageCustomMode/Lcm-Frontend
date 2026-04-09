@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ContentItem } from '$lib/types';
 	import CardEditor from '$lib/components/activity/CardEditor.svelte';
+	import { renderMarkdown } from '$lib/utils/markdown';
 
 	interface Props {
 		items?: ContentItem[];
@@ -137,7 +138,7 @@
 			<h3>Notes</h3>
 			{#each notes() as note}
 				<div class="note-content">
-					{@html (note.content as Record<string, unknown>).text ?? ''}
+					{@html renderMarkdown(String((note.content as Record<string, unknown>).text ?? ''))}
 				</div>
 			{/each}
 		</div>
@@ -256,6 +257,18 @@
 		padding: 0.75rem;
 		background: #fafaf8;
 		border-radius: var(--radius);
+	}
+
+	.note-content :global(p) {
+		margin: 0 0 0.5rem;
+	}
+
+	.note-content :global(p:last-child) {
+		margin-bottom: 0;
+	}
+
+	.note-content :global(pre) {
+		margin: 0 0 0.5rem;
 		white-space: pre-wrap;
 	}
 

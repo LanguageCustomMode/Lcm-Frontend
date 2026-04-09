@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { renderMarkdown } from '$lib/utils/markdown';
+
 	interface Props {
 		role: 'user' | 'assistant';
 		content: string;
@@ -8,7 +10,9 @@
 </script>
 
 <div class="chat-message chat-message-{role}">
-	<p>{content}</p>
+	<div class="message-body">
+		{@html renderMarkdown(content)}
+	</div>
 </div>
 
 <style>
@@ -19,6 +23,19 @@
 		font-size: 0.9rem;
 		line-height: 1.4;
 		background: #f6f6f1;
+	}
+
+	.message-body :global(p) {
+		margin: 0 0 0.5rem;
+	}
+
+	.message-body :global(p:last-child) {
+		margin-bottom: 0;
+	}
+
+	.message-body :global(pre) {
+		margin: 0 0 0.5rem;
+		white-space: pre-wrap;
 	}
 
 	.chat-message-user {
