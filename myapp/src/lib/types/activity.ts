@@ -22,6 +22,7 @@ export interface Activity {
 	config: Record<string, unknown>;
 	grid_positions: [number, number][];
 	parent_activity_id?: string;
+	primer_completed?: boolean;
 	xp: number;
 	level: number;
 }

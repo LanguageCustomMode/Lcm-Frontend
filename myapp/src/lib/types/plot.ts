@@ -22,6 +22,8 @@ export interface Plot {
 	grid_cols: number;
 	archived: boolean;
 	activity_count: number;
+	questionnaire?: Record<string, unknown>;
+	kit_type?: string;
 }
 
 export interface PlotDetail extends Plot {
@@ -38,7 +40,12 @@ export interface PlotComposition {
 export interface Idea {
 	id: string;
 	content: string;
-	type: 'media' | 'idea' | 'note';
+	idea_type?: string;
+	activity_type?: string;
+	tag?: string;
+	source?: string;
+	sort_order?: number;
+	claimed_activity_id?: string;
 }
 
 // Forward import to avoid circular

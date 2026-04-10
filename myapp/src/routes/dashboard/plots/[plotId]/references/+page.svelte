@@ -3,6 +3,7 @@
 
 	type ReferenceDoc = { id: string; title: string; status: string; chunk_count?: number };
 	type ChunkResult = { id: string; content: string; similarity: number };
+	type ReadingEstimate = { title: string; total_words: number; estimated_activities: number; words_per_activity: number };
 
 	let references = $state<ReferenceDoc[]>([]);
 	let selected = $state<string | null>(null);
@@ -13,6 +14,8 @@
 	let text = $state('');
 	let file = $state<File | null>(null);
 	let error = $state<string | null>(null);
+	let readingEstimate = $state<ReadingEstimate | null>(null);
+	let creatingReading = $state(false);
 
 	const handleFileChange = (event: Event) => {
 		const input = event.target as HTMLInputElement;
@@ -99,6 +102,33 @@
 		}
 	};
 
+	const estimateReading = async (refId: string) => {
+		if (!data.plot) return;
+		readingEstimate = null;
+		try {
+			const res = await fetch(`/api/plots/${data.plot.id}/references/${refId}/reading-estimate`);
+			if (!res.ok) throw new Error(await res.text());
+			readingEstimate = await res.json();
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'Failed to estimate reading';
+		}
+	};
+
+	const createReading = async (refId: string) => {
+		if (!data.plot) return;
+		creatingReading = true;
+		error = null;
+		try {
+			const res = await fetch(`/api/plots/${data.plot.id}/references/${refId}/create-reading`, { method: 'POST' });
+			if (!res.ok) throw new Error(await res.text());
+			readingEstimate = null;
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'Failed to create reading activities';
+		} finally {
+			creatingReading = false;
+		}
+	};
+
 	$effect(() => {
 		if (data.plot) loadReferences();
 	});
@@ -142,12 +172,30 @@
 							<span>{ref.title}</span>
 							<small>{ref.status}</small>
 						</button>
+						<button type="button" class="reading" on:click={() => estimateReading(ref.id)}>Reading</button>
 						<button type="button" class="delete" on:click={() => deleteReference(ref.id)}>Delete</button>
 					</li>
 				{/each}
 			</ul>
 		{/if}
 	</section>
+
+	{#if readingEstimate}
+		<section class="panel">
+			<h2>Create Reading Activities</h2>
+			<p>
+				<strong>{readingEstimate.title}</strong> — {readingEstimate.total_words} words
+				will produce approximately <strong>{readingEstimate.estimated_activities}</strong> reading activities
+				(~{readingEstimate.words_per_activity} words each).
+			</p>
+			<div class="reading-actions">
+				<button type="button" disabled={creatingReading} on:click={() => { if (selected) createReading(selected); }}>
+					{creatingReading ? 'Creating...' : 'Create Reading Activities'}
+				</button>
+				<button type="button" class="secondary" on:click={() => readingEstimate = null}>Cancel</button>
+			</div>
+		</section>
+	{/if}
 
 	<section class="panel">
 		<h2>Search Chunks</h2>
@@ -257,6 +305,22 @@
 		border-radius: var(--radius);
 		padding: 0.6rem;
 		background: #fdfcf6;
+	}
+
+	.reference-list .reading {
+		background: #27ae60;
+		color: white;
+		border-color: transparent;
+	}
+
+	.reading-actions {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.reading-actions .secondary {
+		background: #fff;
+		color: #333;
 	}
 
 	.error {

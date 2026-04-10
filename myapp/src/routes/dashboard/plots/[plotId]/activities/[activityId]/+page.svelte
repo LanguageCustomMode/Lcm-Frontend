@@ -11,6 +11,7 @@
 	let stats = $state<ActivityStats | null>(null);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
+	let showModifyChat = $state(false);
 
 	const loadActivity = async () => {
 		loading = true;
@@ -21,6 +22,12 @@
 			activity = await res.json();
 			const statsRes = await fetch(`/api/activities/${$page.params.activityId}/stats`);
 			if (statsRes.ok) stats = await statsRes.json();
+
+			// Primer gate: redirect to primer worksheet if not completed
+			if (activity && activity.primer_completed === false) {
+				goto(`/dashboard/plots/${data.plot?.id}/activities/${activity.id}/worksheet?type=primer`);
+				return;
+			}
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to load activity';
 		} finally {
@@ -44,17 +51,23 @@
 			<p class="meta">{activity.type.replace(/_/g, ' ')}</p>
 		</div>
 		<div class="actions">
-			<button type="button" on:click={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity.id}/review`)}>
+			<button type="button" onclick={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity?.id}/review`)}>
 				Review
 			</button>
 			<button
 				type="button"
-				on:click={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity.id}/interact`)}
+				onclick={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity?.id}/interact`)}
 			>
 				Practice
 			</button>
-			<button type="button" on:click={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity.id}/edit`)}>
+			<button type="button" onclick={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity?.id}/worksheet?type=practice`)}>
+				Worksheet
+			</button>
+			<button type="button" onclick={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity?.id}/edit`)}>
 				Edit
+			</button>
+			<button type="button" class="secondary" onclick={() => showModifyChat = !showModifyChat}>
+				{showModifyChat ? 'Hide Chat' : 'Modify'}
 			</button>
 		</div>
 	</div>
@@ -68,7 +81,19 @@
 			<div><strong>Streak</strong><span>{stats.streak}</span></div>
 		</div>
 	{/if}
-	<ActivityBrowser activityId={activity.id} />
+
+	<div class="content-layout" class:with-chat={showModifyChat}>
+		<div class="browser">
+			<ActivityBrowser activityId={activity.id} />
+		</div>
+		{#if showModifyChat}
+			<aside class="modify-panel">
+				{#await import('$lib/components/activity/ModifyChat.svelte') then { default: ModifyChat }}
+					<ModifyChat activityId={activity.id} />
+				{/await}
+			</aside>
+		{/if}
+	</div>
 {:else}
 	<p>No activity found.</p>
 {/if}
@@ -90,6 +115,7 @@
 	.actions {
 		display: flex;
 		gap: 0.5rem;
+		flex-wrap: wrap;
 	}
 
 	button {
@@ -99,6 +125,11 @@
 		border-radius: 999px;
 		padding: 0.35rem 0.8rem;
 		cursor: pointer;
+	}
+
+	.secondary {
+		background: #fff;
+		color: #333;
 	}
 
 	.stats-grid {
@@ -121,6 +152,26 @@
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		color: #666;
+	}
+
+	.content-layout {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.content-layout.with-chat {
+		grid-template-columns: 1fr 350px;
+	}
+
+	.modify-panel {
+		max-height: 70vh;
+		overflow: hidden;
+	}
+
+	@media (max-width: 900px) {
+		.content-layout.with-chat {
+			grid-template-columns: 1fr;
+		}
 	}
 
 	.error {

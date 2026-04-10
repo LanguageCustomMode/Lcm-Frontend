@@ -3,11 +3,12 @@
 
 	interface Props {
 		onselect?: (type: ActivityType) => void;
-		mode?: 'create' | 'extend';
-		onmodechange?: (mode: 'create' | 'extend') => void;
+		mode?: 'create' | 'extend' | 'quick';
+		onmodechange?: (mode: 'create' | 'extend' | 'quick') => void;
+		onquickcreate?: (type: ActivityType, idea: string) => void;
 	}
 
-	let { onselect, mode = 'create', onmodechange }: Props = $props();
+	let { onselect, mode = 'create', onmodechange, onquickcreate }: Props = $props();
 	const activityTypes: ActivityType[] = [
 		'vocabulary',
 		'grammar_theory',
@@ -26,6 +27,7 @@
 	];
 
 	let selected: ActivityType | null = $state(null);
+	let quickIdea = $state('');
 
 	const formatLabel = (value: string) => value.replace(/_/g, ' ');
 	const handleSelect = (type: ActivityType) => {
@@ -33,8 +35,14 @@
 		if (selected) onselect?.(selected);
 	};
 
-	const handleMode = (value: 'create' | 'extend') => {
+	const handleMode = (value: 'create' | 'extend' | 'quick') => {
 		onmodechange?.(value);
+	};
+
+	const handleQuickCreate = () => {
+		if (!selected || !quickIdea.trim()) return;
+		onquickcreate?.(selected, quickIdea.trim());
+		quickIdea = '';
 	};
 </script>
 
@@ -56,6 +64,13 @@
 			>
 				Extend
 			</button>
+			<button
+				type="button"
+				class:active={mode === 'quick'}
+				onclick={() => handleMode('quick')}
+			>
+				Quick Add
+			</button>
 		</div>
 	</div>
 	<div class="tool-grid">
@@ -70,7 +85,16 @@
 			</button>
 		{/each}
 	</div>
-	{#if selected}
+	{#if selected && mode === 'quick'}
+		<div class="quick-create">
+			<input
+				bind:value={quickIdea}
+				placeholder="Type an idea for this activity..."
+				onkeydown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleQuickCreate(); }}}
+			/>
+			<button type="button" onclick={handleQuickCreate} disabled={!quickIdea.trim()}>Add to Grid</button>
+		</div>
+	{:else if selected}
 		<p class="hint">
 			{mode === 'create'
 				? 'Click an empty cell to place this activity.'
@@ -141,5 +165,35 @@
 	.hint {
 		font-size: 0.75rem;
 		color: #555;
+	}
+
+	.quick-create {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+	}
+
+	.quick-create input {
+		flex: 1;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
+		padding: 0.4rem 0.6rem;
+		font-size: 0.8rem;
+	}
+
+	.quick-create button {
+		border: 1px solid var(--color-border);
+		background: var(--color-primary);
+		color: white;
+		border-radius: 999px;
+		padding: 0.35rem 0.8rem;
+		font-size: 0.75rem;
+		cursor: pointer;
+		white-space: nowrap;
+	}
+
+	.quick-create button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 </style>
