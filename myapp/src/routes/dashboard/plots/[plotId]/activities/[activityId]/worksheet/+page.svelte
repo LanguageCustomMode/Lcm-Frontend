@@ -36,6 +36,7 @@
 	let feedbackText = $state('');
 	let error = $state<string | null>(null);
 	let completed = $state(false);
+	let lastItemIndex = $state<number | null>(null);
 
 	const worksheetType = $derived(() => {
 		return $page.url.searchParams.get('type') || 'practice';
@@ -44,6 +45,17 @@
 	const currentItem = $derived(() => {
 		if (!session) return null;
 		return session.items[currentIndex] ?? null;
+	});
+
+	$effect(() => {
+		const item = currentItem();
+		if (!item) return;
+		if (lastItemIndex !== currentIndex) {
+			userResponse = item.response ?? '';
+			feedbackText = item.feedback ?? '';
+			userFeedback = item.user_feedback ?? '';
+			lastItemIndex = currentIndex;
+		}
 	});
 
 	const skipsRemaining = $derived(() => {
@@ -65,6 +77,11 @@
 				activity_id: $page.params.activityId,
 				worksheet_type: worksheetType(),
 			});
+			if (session?.items?.[0]) {
+				userResponse = session.items[0].response ?? '';
+				feedbackText = session.items[0].feedback ?? '';
+				userFeedback = session.items[0].user_feedback ?? '';
+			}
 		} catch (e: any) {
 			error = e.detail || e.message;
 		}
@@ -105,7 +122,6 @@
 			error = e.message;
 		}
 		loading = false;
-		userResponse = '';
 	};
 
 	const skipItem = async () => {
@@ -139,7 +155,9 @@
 		for (let i = currentIndex + 1; i < session.items.length; i++) {
 			if (session.items[i].status === 'pending') {
 				currentIndex = i;
-				feedbackText = '';
+				userResponse = session.items[i].response ?? '';
+				feedbackText = session.items[i].feedback ?? '';
+				userFeedback = session.items[i].user_feedback ?? '';
 				return;
 			}
 		}
@@ -219,13 +237,13 @@
 			</div>
 		{/if}
 
-		{#if currentItem()?.status === 'pending'}
+		{#if currentItem()?.status !== 'skipped'}
 			{#if !currentItem()?.options}
 				<textarea
 					bind:value={userResponse}
 					placeholder="Type your response..."
 					rows="3"
-					onkeydown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitResponse(); }}}
+					onkeydown={(e) => { if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); submitResponse(); }}}
 				></textarea>
 			{/if}
 			<div class="item-actions">
@@ -329,6 +347,7 @@
 		text-align: left;
 		border: 1px solid var(--color-border);
 		background: #fff;
+		color: #333;
 		border-radius: var(--radius);
 		padding: 0.5rem 0.75rem;
 		cursor: pointer;
