@@ -72,9 +72,8 @@
 	};
 
 	const deleteReference = async (refId: string) => {
-		if (!data.plot) return;
 		try {
-			const res = await fetch(`/api/plots/${data.plot.id}/references/${refId}`, { method: 'DELETE' });
+			const res = await fetch(`/api/references/${refId}`, { method: 'DELETE' });
 			if (!res.ok) throw new Error(await res.text());
 			references = references.filter((ref) => ref.id !== refId);
 			if (selected === refId) {
@@ -87,15 +86,17 @@
 	};
 
 	const search = async () => {
-		if (!data.plot || !selected || !query.trim()) return;
+		if (!data.plot || !query.trim()) return;
 		try {
-			const res = await fetch(
-				`/api/plots/${data.plot.id}/references/${selected}/chunks?q=${encodeURIComponent(query)}&limit=10`
-			);
+			const res = await fetch(`/api/plots/${data.plot.id}/references/search`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ query: query.trim(), limit: 10 })
+			});
 			if (!res.ok) throw new Error(await res.text());
 			searchResults = await res.json();
 		} catch (err) {
-			error = err instanceof Error ? err.message : 'Failed to search reference';
+			error = err instanceof Error ? err.message : 'Failed to search references';
 		}
 	};
 
@@ -150,19 +151,10 @@
 	</section>
 
 	<section class="panel">
-		<h2>Search Chunks</h2>
-		<label>
-			Reference
-			<select bind:value={selected}>
-				<option value="">Select reference</option>
-				{#each references as ref}
-					<option value={ref.id}>{ref.title}</option>
-				{/each}
-			</select>
-		</label>
+		<h2>Semantic Search</h2>
 		<label>
 			Query
-			<input bind:value={query} placeholder="Search the reference content" />
+			<input bind:value={query} placeholder="Search across all references" />
 		</label>
 		<button type="button" on:click={search}>Search</button>
 		{#if searchResults.length > 0}

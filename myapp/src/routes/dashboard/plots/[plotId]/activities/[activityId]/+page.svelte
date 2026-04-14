@@ -44,16 +44,16 @@
 			<p class="meta">{activity.type.replace(/_/g, ' ')}</p>
 		</div>
 		<div class="actions">
-			<button type="button" on:click={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity.id}/review`)}>
+			<button type="button" onclick={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity!.id}/review`)}>
 				Review
 			</button>
 			<button
 				type="button"
-				on:click={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity.id}/interact`)}
+				onclick={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity!.id}/interact`)}
 			>
 				Practice
 			</button>
-			<button type="button" on:click={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity.id}/edit`)}>
+			<button type="button" onclick={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity!.id}/edit`)}>
 				Edit
 			</button>
 		</div>

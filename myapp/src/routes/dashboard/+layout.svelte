@@ -23,9 +23,12 @@
 		<div class="profile">
 			{#if data.profile}
 				<div class="avatar">{data.profile.username?.slice(0, 1)?.toUpperCase()}</div>
-				<div>
+				<div class="profile-info">
 					<p class="name">{data.profile.username}</p>
-					<p class="meta">Level {data.profile.level} • {data.profile.xp} XP</p>
+					<p class="meta">Lv.{data.profile.level} · {data.profile.xp} XP</p>
+					{#if data.gamification}
+						<p class="meta coin-meta">{data.gamification.coins} ◈</p>
+					{/if}
 				</div>
 			{:else}
 				<p class="meta">Loading profile...</p>
@@ -107,9 +110,19 @@
 		font-weight: 600;
 	}
 
+	.profile-info {
+		display: grid;
+		gap: 0.1rem;
+	}
+
 	.meta {
 		font-size: 0.7rem;
 		color: #666;
+	}
+
+	.coin-meta {
+		color: var(--color-accent);
+		font-weight: 600;
 	}
 
 	nav {

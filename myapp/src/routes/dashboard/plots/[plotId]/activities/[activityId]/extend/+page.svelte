@@ -30,7 +30,7 @@
 
 	const extend = async (targetType: string) => {
 		try {
-			const res = await fetch(`/api/activities/${$page.params.activityId}/extend`, {
+			const res = await fetch(`/api/activities/${$page.params.activityId}/extensions`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ target_type: targetType })

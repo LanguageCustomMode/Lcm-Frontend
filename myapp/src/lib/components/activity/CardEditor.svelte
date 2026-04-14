@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { Card } from '$lib/types';
+	import type { CardContent } from '$lib/types';
 
 	interface Props {
-		card?: Card;
-		onsave?: (data: { front: string; back: string; extra_fields?: Record<string, unknown> }) => void;
+		card?: CardContent;
+		onsave?: (data: { front: string; back: string }) => void;
 		oncancel?: () => void;
 	}
 

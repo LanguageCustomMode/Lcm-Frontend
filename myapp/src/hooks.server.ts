@@ -8,7 +8,8 @@ const supabaseHandle: Handle = async ({ event, resolve }) => {
 	event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
 		cookies: {
 			getAll: () => event.cookies.getAll(),
-			setAll: (cookiesToSet) => {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			setAll: (cookiesToSet: { name: string; value: string; options: any }[]) => {
 				cookiesToSet.forEach(({ name, value, options }) => {
 					event.cookies.set(name, value, { ...options, path: '/' });
 				});

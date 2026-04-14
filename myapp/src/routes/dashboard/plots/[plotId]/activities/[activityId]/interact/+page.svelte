@@ -4,12 +4,27 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 
+	interface Correction {
+		original?: string;
+		correction?: string;
+		explanation?: string;
+		error_type?: string;
+		[key: string]: unknown;
+	}
+
+	interface SessionSummary {
+		xp_earned: number;
+		summary?: string;
+		errors?: Correction[];
+	}
+
 	let { data } = $props();
 	let messages: { role: 'user' | 'assistant'; content: string }[] = $state([]);
 	let loading = $state(false);
 	let sessionId = $state<string | null>(null);
-	let corrections = $state<Record<string, unknown>[]>([]);
+	let corrections = $state<Correction[]>([]);
 	let error = $state<string | null>(null);
+	let sessionSummary = $state<SessionSummary | null>(null);
 
 	const startSession = async () => {
 		try {
@@ -21,7 +36,7 @@
 			if (!res.ok) throw new Error(await res.text());
 			const payload = await res.json();
 			sessionId = payload.session_id;
-			messages = [{ role: 'assistant', content: payload.opening_message }];
+			messages = [{ role: 'assistant', content: payload.message }];
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to start session';
 		}
@@ -75,7 +90,10 @@
 	const endSession = async () => {
 		if (!sessionId) return;
 		try {
-			await fetch(`/api/llm/interact/${sessionId}/end`, { method: 'POST' });
+			const res = await fetch(`/api/llm/interact/${sessionId}/end`, { method: 'POST' });
+			if (res.ok) {
+				sessionSummary = await res.json();
+			}
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to end session';
 		}
@@ -88,22 +106,57 @@
 {#if error}
 	<p class="error">{error}</p>
 {/if}
-<div class="practice-layout">
-	<ChatWindow {messages} {loading} onsend={sendMessage} />
-	<div class="panel">
-		<h3>Corrections</h3>
-		{#if corrections.length === 0}
-			<p>No corrections yet.</p>
-		{:else}
-			<ul>
-				{#each corrections as item}
-					<li>{JSON.stringify(item)}</li>
+
+{#if sessionSummary}
+	<div class="summary-card">
+		<h2>Session Complete</h2>
+		{#if sessionSummary.summary}
+			<p class="summary-text">{sessionSummary.summary}</p>
+		{/if}
+		<div class="xp-badge">+{sessionSummary.xp_earned} XP</div>
+		{#if sessionSummary.errors && sessionSummary.errors.length > 0}
+			<h3>Errors reviewed</h3>
+			<ul class="summary-errors">
+				{#each sessionSummary.errors as err}
+					<li>
+						{#if err.original}<span class="orig">{err.original}</span>{/if}
+						{#if err.correction}<span class="arrow">→</span><span class="fix">{err.correction}</span>{/if}
+						{#if err.explanation}<p class="expl">{err.explanation}</p>{/if}
+					</li>
 				{/each}
 			</ul>
 		{/if}
-		<button type="button" onclick={endSession}>End Session</button>
+		<button type="button" onclick={() => { sessionSummary = null; corrections = []; startSession(); }}>New Session</button>
 	</div>
-</div>
+{:else}
+	<div class="practice-layout">
+		<ChatWindow {messages} {loading} onsend={sendMessage} />
+		<div class="panel">
+			<h3>Corrections</h3>
+			{#if corrections.length === 0}
+				<p class="empty-note">No corrections yet.</p>
+			{:else}
+				<ul class="corrections-list">
+					{#each corrections as item}
+						<li class="correction-item">
+							{#if item.original || item.correction}
+								<div class="correction-pair">
+									{#if item.original}<span class="orig">{item.original}</span>{/if}
+									{#if item.correction}<span class="arrow">→</span><span class="fix">{item.correction}</span>{/if}
+								</div>
+								{#if item.explanation}<p class="expl">{item.explanation}</p>{/if}
+								{#if item.error_type}<span class="tag">{item.error_type}</span>{/if}
+							{:else}
+								<code>{JSON.stringify(item)}</code>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			{/if}
+			<button type="button" onclick={endSession}>End Session</button>
+		</div>
+	</div>
+{/if}
 
 <style>
 	.practice-layout {
@@ -122,11 +175,60 @@
 		gap: 0.75rem;
 	}
 
-	.panel ul {
+	.empty-note {
+		font-size: 0.8rem;
+		color: #999;
+	}
+
+	.corrections-list {
 		list-style: none;
 		display: grid;
-		gap: 0.5rem;
+		gap: 0.75rem;
+		font-size: 0.8rem;
+	}
+
+	.correction-item {
+		border-left: 3px solid var(--color-accent);
+		padding-left: 0.6rem;
+		display: grid;
+		gap: 0.25rem;
+	}
+
+	.correction-pair {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		align-items: center;
+	}
+
+	.orig {
+		color: #b42318;
+		text-decoration: line-through;
+	}
+
+	.arrow {
+		color: #999;
+	}
+
+	.fix {
+		color: #0f766e;
+		font-weight: 600;
+	}
+
+	.expl {
 		font-size: 0.75rem;
+		color: #555;
+		margin: 0;
+	}
+
+	.tag {
+		font-size: 0.65rem;
+		background: #f0f0ea;
+		color: #555;
+		border-radius: 999px;
+		padding: 0.15rem 0.5rem;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
 	}
 
 	button {
@@ -141,6 +243,41 @@
 	.error {
 		color: #b42318;
 		margin-bottom: 0.5rem;
+	}
+
+	.summary-card {
+		background: white;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius);
+		padding: 1.5rem;
+		display: grid;
+		gap: 1rem;
+		max-width: 600px;
+	}
+
+	.summary-text {
+		color: #555;
+		font-size: 0.9rem;
+	}
+
+	.xp-badge {
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: var(--color-accent);
+	}
+
+	.summary-errors {
+		list-style: none;
+		display: grid;
+		gap: 0.75rem;
+	}
+
+	.summary-errors li {
+		border-left: 3px solid var(--color-accent);
+		padding-left: 0.6rem;
+		font-size: 0.85rem;
+		display: grid;
+		gap: 0.2rem;
 	}
 
 	@media (max-width: 900px) {

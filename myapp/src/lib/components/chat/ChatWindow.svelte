@@ -51,16 +51,28 @@
 
 	{#if suggestion}
 		<div class="suggestion">
-			<h4>Suggested Activity Spec</h4>
-			<pre>{JSON.stringify(suggestion, null, 2)}</pre>
+			<div class="suggestion-header">
+				<h4>Proposed Activity</h4>
+				{#if suggestion.name}<span class="spec-name">{String(suggestion.name)}</span>{/if}
+			</div>
+			{#if suggestion.type}
+				<p class="spec-meta">Type: <strong>{String(suggestion.type).replace(/_/g, ' ')}</strong></p>
+			{/if}
+			{#if suggestion.description}
+				<p class="spec-desc">{String(suggestion.description)}</p>
+			{/if}
+			<details class="spec-raw">
+				<summary>View full spec</summary>
+				<pre>{JSON.stringify(suggestion, null, 2)}</pre>
+			</details>
 			<div class="suggestion-actions">
-				<button type="button" on:click={() => onaccept?.(suggestion)}>Accept</button>
+				<button type="button" on:click={() => onaccept?.(suggestion)}>Accept & Create</button>
 				<div class="modify">
 					<input
 						bind:value={modifyText}
-						placeholder="Ask for changes (e.g. add more examples)"
+						placeholder="Ask for changes (e.g. add more vocabulary examples)"
 					/>
-					<button type="button" on:click={handleModify}>Send</button>
+					<button type="button" on:click={handleModify}>Modify</button>
 				</div>
 			</div>
 		</div>
@@ -96,22 +108,57 @@
 	}
 
 	.suggestion {
-		border: 1px dashed #d8d8d0;
+		border: 1px solid #c8dfc5;
 		border-radius: var(--radius);
-		padding: 0.75rem;
+		padding: 0.9rem;
 		display: grid;
-		gap: 0.5rem;
-		background: #fdfbf4;
+		gap: 0.6rem;
+		background: #f4faf4;
 	}
 
-	.suggestion pre {
+	.suggestion-header {
+		display: flex;
+		align-items: baseline;
+		gap: 0.6rem;
+	}
+
+	.suggestion-header h4 {
+		font-size: 0.8rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #4a7c59;
+	}
+
+	.spec-name {
+		font-weight: 600;
+		font-size: 0.95rem;
+	}
+
+	.spec-meta {
+		font-size: 0.8rem;
+		color: #555;
+	}
+
+	.spec-desc {
+		font-size: 0.85rem;
+		color: #444;
+	}
+
+	.spec-raw summary {
+		font-size: 0.75rem;
+		color: #888;
+		cursor: pointer;
+	}
+
+	.spec-raw pre {
 		background: #fff;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius);
 		padding: 0.6rem;
-		font-size: 0.75rem;
-		max-height: 180px;
+		font-size: 0.72rem;
+		max-height: 160px;
 		overflow: auto;
+		margin-top: 0.4rem;
 	}
 
 	.suggestion-actions {
@@ -119,13 +166,14 @@
 		gap: 0.5rem;
 	}
 
-	.suggestion-actions button {
+	.suggestion-actions > button {
 		border: 1px solid var(--color-border);
 		background: var(--color-primary);
 		color: white;
 		border-radius: 999px;
-		padding: 0.35rem 0.8rem;
+		padding: 0.4rem 1rem;
 		cursor: pointer;
+		justify-self: start;
 	}
 
 	.modify {
@@ -139,10 +187,15 @@
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius);
 		padding: 0.35rem 0.6rem;
+		font-size: 0.85rem;
 	}
 
 	.modify button {
+		border: 1px solid var(--color-border);
 		background: #fff;
 		color: #333;
+		border-radius: 999px;
+		padding: 0.35rem 0.75rem;
+		cursor: pointer;
 	}
 </style>
