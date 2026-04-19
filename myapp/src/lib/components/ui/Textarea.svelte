@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { HTMLInputAttributes } from 'svelte/elements';
+	import type { HTMLTextareaAttributes } from 'svelte/elements';
 
-	interface Props extends Omit<HTMLInputAttributes, 'value'> {
+	interface Props extends Omit<HTMLTextareaAttributes, 'value'> {
 		label?: string;
 		error?: string;
-		value?: string | number;
+		value?: string;
 	}
 
 	let { label, error, value = $bindable(''), ...rest }: Props = $props();
@@ -14,7 +14,7 @@
 	{#if label}
 		<label>{label}</label>
 	{/if}
-	<input {...rest} bind:value class:input-error={error} />
+	<textarea {...rest} bind:value class:input-error={error}></textarea>
 	{#if error}
 		<span class="error">{error}</span>
 	{/if}
@@ -31,6 +31,11 @@
 		font-size: 0.8rem;
 		font-weight: 500;
 		color: #555;
+	}
+
+	textarea {
+		resize: vertical;
+		min-height: 80px;
 	}
 
 	.input-error {

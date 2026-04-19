@@ -178,24 +178,44 @@
 
 	.modify {
 		display: flex;
-		gap: 0.5rem;
 		align-items: center;
+		border: 1.5px solid var(--color-border);
+		border-radius: 999px;
+		overflow: hidden;
+		background: white;
+		transition: border-color 0.15s, box-shadow 0.15s;
+	}
+
+	.modify:focus-within {
+		border-color: var(--color-primary);
+		box-shadow: 0 0 0 3px rgba(74, 124, 89, 0.12);
 	}
 
 	.modify input {
 		flex: 1;
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius);
-		padding: 0.35rem 0.6rem;
+		border: none !important;
+		box-shadow: none !important;
+		border-radius: 0;
+		background: transparent;
+		padding: 0.45rem 0.85rem;
 		font-size: 0.85rem;
 	}
 
 	.modify button {
-		border: 1px solid var(--color-border);
-		background: #fff;
+		flex-shrink: 0;
+		border: none;
+		background: #f0f0ec;
 		color: #333;
-		border-radius: 999px;
-		padding: 0.35rem 0.75rem;
+		border-radius: 0 999px 999px 0;
+		padding: 0.4rem 0.85rem;
+		font-size: 0.8rem;
+		font-weight: 500;
+		font-family: inherit;
 		cursor: pointer;
+		transition: background 0.15s;
+	}
+
+	.modify button:hover {
+		background: #e5e5e0;
 	}
 </style>
