@@ -20,9 +20,7 @@
 		'dialogue',
 		'writing_practice',
 		'pronunciation',
-		'listening',
-		'errors_srs',
-		'generic_conversation'
+		'listening'
 	];
 
 	let selected: ActivityType | null = $state(null);
