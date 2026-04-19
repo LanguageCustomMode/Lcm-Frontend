@@ -45,7 +45,7 @@
 			}
 			const payload = await res.json();
 			conversationId = payload.conversation_id;
-			messages = [{ role: 'assistant', content: payload.assistant_message }];
+			messages = [{ role: 'assistant', content: payload.message }];
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to start design chat';
 		}

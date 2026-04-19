@@ -4,10 +4,9 @@
 	interface Props {
 		activity: Activity;
 		onsave?: (data: Partial<Activity>) => void;
-		ongenerate?: () => void;
 	}
 
-	let { activity, onsave, ongenerate }: Props = $props();
+	let { activity, onsave }: Props = $props();
 
 	let name = $state(activity.name);
 	let type = $state(activity.type);
@@ -39,9 +38,6 @@
 			<p>Update the core details and configuration.</p>
 		</div>
 		<div class="actions">
-			{#if ongenerate}
-				<button type="button" on:click={ongenerate}>Generate Cards</button>
-			{/if}
 			<button type="button" on:click={save}>Save Changes</button>
 		</div>
 	</div>
@@ -117,11 +113,6 @@
 		border-radius: 999px;
 		padding: 0.4rem 0.9rem;
 		cursor: pointer;
-	}
-
-	.actions button:first-child {
-		background: #f0f0ea;
-		color: #333;
 	}
 
 	.form-grid {

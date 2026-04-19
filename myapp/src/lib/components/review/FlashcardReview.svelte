@@ -41,7 +41,7 @@
 		return () => window.removeEventListener('keydown', handler);
 	});
 
-	const content = $derived(item.content as Record<string, unknown>);
+	const content = $derived(item.content as unknown as Record<string, unknown>);
 </script>
 
 <div class="flashcard">

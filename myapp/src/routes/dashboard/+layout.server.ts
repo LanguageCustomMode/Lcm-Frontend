@@ -5,11 +5,15 @@ export const load: LayoutServerLoad = async ({ locals, fetch }) => {
 	const { session } = await locals.safeGetSession();
 	if (!session) throw redirect(303, '/auth/login');
 
-	const profileRes = await fetch('/api/users/me');
+	const [profileRes, plotsRes, gamificationRes] = await Promise.all([
+		fetch('/api/users/me'),
+		fetch('/api/plots'),
+		fetch('/api/users/me/gamification')
+	]);
+
 	const profile = profileRes.ok ? await profileRes.json() : null;
-
-	const plotsRes = await fetch('/api/plots');
 	const plots = plotsRes.ok ? await plotsRes.json() : [];
+	const gamification = gamificationRes.ok ? await gamificationRes.json() : null;
 
-	return { session, profile, plots };
+	return { session, profile, plots, gamification };
 };

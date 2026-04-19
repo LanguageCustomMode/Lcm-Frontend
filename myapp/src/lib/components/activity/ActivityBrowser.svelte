@@ -21,6 +21,7 @@
 	let pageSize = $state(20);
 	let editingId = $state<string | null>(null);
 	let creating = $state(false);
+	let feedbackSent = $state<Set<string>>(new Set());
 
 	// Separate notes from SRS-eligible items
 	const notes = $derived(() =>
@@ -74,7 +75,7 @@
 	};
 
 	const getDisplayText = (item: ContentItem): { primary: string; secondary: string } => {
-		const c = item.content as Record<string, unknown>;
+		const c = item.content as unknown as Record<string, unknown>;
 		switch (item.content_type) {
 			case 'card':
 			case 'error':
@@ -109,6 +110,18 @@
 		}
 	};
 
+	const sendFeedback = async (item: ContentItem, rating: 'up' | 'down') => {
+		if (feedbackSent.has(item.id)) return;
+		try {
+			await fetch(`/api/content/${item.id}/feedback`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ rating })
+			});
+			feedbackSent = new Set([...feedbackSent, item.id]);
+		} catch { /* non-critical */ }
+	};
+
 	const handleDelete = async (item: ContentItem) => {
 		if (ondelete) {
 			ondelete(item.id);
@@ -138,7 +151,7 @@
 			<h3>Notes</h3>
 			{#each notes() as note}
 				<div class="note-content">
-					{@html renderMarkdown(String((note.content as Record<string, unknown>).text ?? ''))}
+					{@html renderMarkdown(String((note.content as unknown as Record<string, unknown>).text ?? ''))}
 				</div>
 			{/each}
 		</div>
@@ -212,6 +225,12 @@
 						<td>{display.secondary}</td>
 						<td>{item.srs_records ? itemState(item.srs_records.state) : '—'}</td>
 						<td class="row-actions">
+							{#if feedbackSent.has(item.id)}
+								<span class="feedback-sent">✓</span>
+							{:else}
+								<button type="button" class="feedback-btn" title="Good card" on:click={() => sendFeedback(item, 'up')}>👍</button>
+								<button type="button" class="feedback-btn" title="Bad card" on:click={() => sendFeedback(item, 'down')}>👎</button>
+							{/if}
 							<button type="button" on:click={() => handleDelete(item)}>Delete</button>
 						</td>
 					</tr>
@@ -334,6 +353,27 @@
 	.row-actions {
 		display: flex;
 		gap: 0.4rem;
+		align-items: center;
+	}
+
+	.feedback-btn {
+		border: none;
+		background: transparent;
+		padding: 0.15rem;
+		cursor: pointer;
+		font-size: 0.85rem;
+		line-height: 1;
+		border-radius: var(--radius);
+	}
+
+	.feedback-btn:hover {
+		background: #f0f0ea;
+	}
+
+	.feedback-sent {
+		font-size: 0.75rem;
+		color: #0f766e;
+		font-weight: 600;
 	}
 
 	.pagination {

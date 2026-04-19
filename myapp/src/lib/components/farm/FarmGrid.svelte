@@ -57,7 +57,6 @@
 		oncellclick?.(row, col);
 	};
 
-	console.log('safeRows, safeCols, rowsArray, colsArray', safeRows(), safeCols(), rowsArray(), colsArray());
 </script>
 
 <div class="farm-grid">
