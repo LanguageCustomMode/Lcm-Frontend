@@ -6,11 +6,13 @@
 		rows: number;
 		cols: number;
 		activities: Activity[];
+		plotId?: string;
 		onactivityclick?: (activity: Activity) => void;
 		oncellclick?: (row: number, col: number) => void;
+		onactivitymoved?: () => void;
 	}
 
-	let { rows, cols, activities, onactivityclick, oncellclick }: Props = $props();
+	let { rows, cols, activities, plotId, onactivityclick, oncellclick, onactivitymoved }: Props = $props();
 
 	const key = (row: number, col: number) => `${row},${col}`;
 
@@ -48,7 +50,115 @@
 	const rowsArray = $derived(() => Array.from({ length: safeRows() }, (_, index) => index));
 	const colsArray = $derived(() => Array.from({ length: safeCols() }, (_, index) => index));
 
+	// Drag state
+	let dragActivity = $state<Activity | null>(null);
+	let dragSourceAnchor = $state<[number, number] | null>(null);
+	let dragOverCell = $state<[number, number] | null>(null);
+
+	const projectedCells = $derived(() => {
+		if (!dragActivity || !dragSourceAnchor || !dragOverCell) return new Set<string>();
+		const [srcRow, srcCol] = dragSourceAnchor;
+		const [tgtRow, tgtCol] = dragOverCell;
+		const rowOffset = tgtRow - srcRow;
+		const colOffset = tgtCol - srcCol;
+		return new Set(
+			(dragActivity.grid_positions ?? []).map(([r, c]) => key(r + rowOffset, c + colOffset))
+		);
+	});
+
+	const isValidDrop = $derived(() => {
+		if (!dragActivity || !dragSourceAnchor || !dragOverCell) return false;
+		const [srcRow, srcCol] = dragSourceAnchor;
+		const [tgtRow, tgtCol] = dragOverCell;
+		const rowOffset = tgtRow - srcRow;
+		const colOffset = tgtCol - srcCol;
+		if (rowOffset === 0 && colOffset === 0) return false;
+		const newPositions: [number, number][] = (dragActivity.grid_positions ?? []).map(([r, c]) => [r + rowOffset, c + colOffset]);
+		if (newPositions.some(([r, c]) => r < 0 || c < 0 || r >= safeRows() || c >= safeCols())) return false;
+		const occupiedByOthers = new Set<string>();
+		for (const act of activities) {
+			if (act.id === dragActivity.id) continue;
+			for (const [r, c] of act.grid_positions ?? []) occupiedByOthers.add(key(r, c));
+		}
+		return !newPositions.some(([r, c]) => occupiedByOthers.has(key(r, c)));
+	});
+
+	function handleDragStart(activity: Activity, e: DragEvent) {
+		dragActivity = activity;
+		const sorted = [...(activity.grid_positions ?? [])].sort((a, b) => (a[0] - b[0]) || (a[1] - b[1]));
+		dragSourceAnchor = sorted[0] ?? null;
+		e.dataTransfer!.effectAllowed = 'move';
+	}
+
+	function handleDragEnd() {
+		dragActivity = null;
+		dragSourceAnchor = null;
+		dragOverCell = null;
+	}
+
+	function handleDragOver(row: number, col: number, e: DragEvent) {
+		if (!dragActivity) return;
+		e.preventDefault();
+		e.dataTransfer!.dropEffect = 'move';
+		dragOverCell = [row, col];
+	}
+
+	async function handleDrop(row: number, col: number, e: DragEvent) {
+		e.preventDefault();
+		dragOverCell = null;
+
+		if (!dragActivity || !dragSourceAnchor || !plotId) {
+			dragActivity = null;
+			dragSourceAnchor = null;
+			return;
+		}
+
+		const [srcRow, srcCol] = dragSourceAnchor;
+		const rowOffset = row - srcRow;
+		const colOffset = col - srcCol;
+
+		if (rowOffset === 0 && colOffset === 0) {
+			dragActivity = null;
+			dragSourceAnchor = null;
+			return;
+		}
+
+		const newPositions: [number, number][] = (dragActivity.grid_positions ?? []).map(
+			([r, c]) => [r + rowOffset, c + colOffset]
+		);
+
+		if (newPositions.some(([r, c]) => r < 0 || c < 0 || r >= safeRows() || c >= safeCols())) {
+			dragActivity = null;
+			dragSourceAnchor = null;
+			return;
+		}
+
+		const occupiedByOthers = new Set<string>();
+		for (const act of activities) {
+			if (act.id === dragActivity.id) continue;
+			for (const [r, c] of act.grid_positions ?? []) occupiedByOthers.add(key(r, c));
+		}
+		if (newPositions.some(([r, c]) => occupiedByOthers.has(key(r, c)))) {
+			dragActivity = null;
+			dragSourceAnchor = null;
+			return;
+		}
+
+		const moved = dragActivity;
+		dragActivity = null;
+		dragSourceAnchor = null;
+
+		await fetch(`/api/activities/${moved.id}`, {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ grid_positions: newPositions })
+		});
+
+		onactivitymoved?.();
+	}
+
 	const handleCellClick = (row: number, col: number) => {
+		if (dragActivity) return;
 		const activity = activityByCell().get(key(row, col));
 		if (activity) {
 			onactivityclick?.(activity);
@@ -67,14 +177,34 @@
 			{#each rowsArray() as r}
 				{#each colsArray() as c}
 					{#key `${r}-${c}`}
-						<div class="cell" on:click={() => handleCellClick(r, c)}>
-							{#if activityByCell().get(key(r, c))}
-								{#if anchorByActivity().get(activityByCell().get(key(r, c))!.id) === key(r, c)}
-									<ActivityTile
-										activity={activityByCell().get(key(r, c))!}
-										ripeness={(activityByCell().get(key(r, c)) as any)?.stats?.ripeness ?? 0}
-										onclick={() => onactivityclick?.(activityByCell().get(key(r, c))!)}
-									/>
+						{@const cellKey = key(r, c)}
+						{@const activity = activityByCell().get(cellKey)}
+						{@const isAnchor = activity && anchorByActivity().get(activity.id) === cellKey}
+						{@const isDragging = dragActivity && (dragActivity.grid_positions ?? []).some(([dr, dc]) => dr === r && dc === c)}
+						{@const isProjected = projectedCells().has(cellKey)}
+						<div
+							class="cell"
+							class:drag-over={isProjected && isValidDrop()}
+							class:drag-invalid={isProjected && !isValidDrop()}
+							class:is-dragging={isDragging}
+							on:click={() => handleCellClick(r, c)}
+							on:dragover={(e) => handleDragOver(r, c, e)}
+							on:drop={(e) => handleDrop(r, c, e)}
+						>
+							{#if activity}
+								{#if isAnchor}
+									<div
+										draggable={true}
+										class="draggable-wrapper"
+										on:dragstart={(e) => handleDragStart(activity, e)}
+										on:dragend={handleDragEnd}
+									>
+										<ActivityTile
+											{activity}
+											ripeness={(activity as any)?.stats?.ripeness ?? 0}
+											onclick={() => onactivityclick?.(activity)}
+										/>
+									</div>
 								{:else}
 									<div class="merged"></div>
 								{/if}
@@ -109,6 +239,33 @@
 		align-items: stretch;
 		justify-content: stretch;
 		cursor: pointer;
+		border-radius: var(--radius);
+		transition: background 0.1s ease, outline 0.1s ease;
+	}
+
+	.cell.drag-over {
+		outline: 2px solid var(--color-primary);
+		outline-offset: -2px;
+		background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+	}
+
+	.cell.drag-invalid {
+		outline: 2px solid #e05050;
+		outline-offset: -2px;
+		background: color-mix(in srgb, #e05050 8%, transparent);
+	}
+
+	.cell.is-dragging {
+		opacity: 0.35;
+	}
+
+	.draggable-wrapper {
+		width: 100%;
+		cursor: grab;
+	}
+
+	.draggable-wrapper:active {
+		cursor: grabbing;
 	}
 
 	.empty-cell {

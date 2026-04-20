@@ -37,6 +37,10 @@
 		quickCreateOpen = false;
 		await invalidateAll();
 	};
+
+	const handleActivityMoved = async () => {
+		await invalidateAll();
+	};
 </script>
 
 <div class="plot-header">
@@ -69,8 +73,10 @@
 		rows={data.plot.grid_rows}
 		cols={data.plot.grid_cols}
 		activities={data.plot.activities ?? []}
+		plotId={data.plot.id}
 		oncellclick={handleCellClick}
 		onactivityclick={handleActivityClick}
+		onactivitymoved={handleActivityMoved}
 	/>
 
 	<Modal bind:open={quickCreateOpen} title="Add activity">
