@@ -1,5 +1,9 @@
 <script lang="ts">
+	import Input from '$lib/components/ui/Input.svelte';
+	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
+	import Checkbox from '$lib/components/ui/Checkbox.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 
 	let { data } = $props();
 
@@ -47,52 +51,31 @@
 <h1>Plot Settings</h1>
 {#if data.plot}
 	<div class="settings-form">
-		<label>
-			Name
-			<input bind:value={name} />
-		</label>
-		<label>
-			Description
-			<textarea bind:value={description} rows="3"></textarea>
-		</label>
-		<label>
-			Target language
-			<Select bind:value={l2Target} label="" required>
-				<option value="Chinese">Chinese</option>
-				<option value="French">French</option>
-				<option value="German">German</option>
-				<option value="Korean">Korean</option>
-				<option value="Spanish">Spanish</option>
-			</Select>
-		</label>
-		<label>
-			Proficiency
-			<select bind:value={proficiency}>
-				<option value="A1">A1</option>
-				<option value="A2">A2</option>
-				<option value="B1">B1</option>
-				<option value="B2">B2</option>
-				<option value="C1">C1</option>
-				<option value="C2">C2</option>
-			</select>
-		</label>
+		<Input label="Name" bind:value={name} />
+		<Textarea label="Description" bind:value={description} rows={3} />
+		<Select label="Target language" bind:value={l2Target} required>
+			<option value="Chinese">Chinese</option>
+			<option value="French">French</option>
+			<option value="German">German</option>
+			<option value="Korean">Korean</option>
+			<option value="Spanish">Spanish</option>
+		</Select>
+		<Select label="Proficiency" bind:value={proficiency}>
+			<option value="A1">A1 – Beginner</option>
+			<option value="A2">A2 – Elementary</option>
+			<option value="B1">B1 – Intermediate</option>
+			<option value="B2">B2 – Upper Intermediate</option>
+			<option value="C1">C1 – Advanced</option>
+			<option value="C2">C2 – Mastery</option>
+		</Select>
 		<div class="grid-row">
-			<label>
-				Grid rows
-				<input type="number" min="1" max="10" bind:value={gridRows} />
-			</label>
-			<label>
-				Grid cols
-				<input type="number" min="1" max="10" bind:value={gridCols} />
-			</label>
+			<Input label="Grid rows" type="number" min={1} max={10} bind:value={gridRows} />
+			<Input label="Grid cols" type="number" min={1} max={10} bind:value={gridCols} />
 		</div>
-		<label class="toggle">
-			<input type="checkbox" bind:checked={archived} />
-			Archive this plot
-		</label>
-		<button type="button" disabled={saving} on:click={save}>
+		<Checkbox label="Archive this plot" bind:checked={archived} />
+		<Button type="button" disabled={saving} onclick={save}>
 			{saving ? 'Saving...' : 'Save Settings'}
-		</button>
+		</Button>
 		{#if message}
 			<p class="success">{message}</p>
 		{/if}
@@ -115,44 +98,13 @@
 		max-width: 560px;
 	}
 
-	label {
-		display: grid;
-		gap: 0.35rem;
-		font-size: 0.85rem;
-		color: #555;
-	}
-
-	input,
-	select,
-	textarea {
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius);
-		padding: 0.45rem 0.6rem;
-		font-family: inherit;
-	}
-
 	.grid-row {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 		gap: 0.75rem;
 	}
 
-	.toggle {
-		display: flex;
-		gap: 0.5rem;
-		align-items: center;
-	}
-
-	button {
-		border: 1px solid var(--color-border);
-		background: var(--color-primary);
-		color: white;
-		border-radius: 999px;
-		padding: 0.45rem 0.9rem;
-		cursor: pointer;
-	}
-
-	.success {
+.success {
 		color: #0f766e;
 	}
 
