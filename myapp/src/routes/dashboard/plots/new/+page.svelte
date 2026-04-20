@@ -33,11 +33,11 @@
 		<Input bind:value={name} label="Plot name" placeholder="My Spanish Story" required />
 		<div class="row">
 			<Select bind:value={l2_target} label="Target language" required>
-				<option value="Spanish">Spanish</option>
+				<option value="Chinese">Chinese</option>
 				<option value="French">French</option>
 				<option value="German">German</option>
-				<option value="Chinese">Chinese</option>
 				<option value="Korean">Korean</option>
+				<option value="Spanish">Spanish</option>
 			</Select>
 			<Select bind:value={proficiency} label="Proficiency">
 				<option value="A1">A1 – Beginner</option>
