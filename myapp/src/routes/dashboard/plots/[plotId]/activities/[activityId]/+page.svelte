@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ActivityBrowser from '$lib/components/activity/ActivityBrowser.svelte';
+	import Worksheet from '$lib/components/activity/Worksheet.svelte';
 	import { onMount } from 'svelte';
 	import type { Activity, ActivityStats } from '$lib/types';
 	import { page } from '$app/stores';
@@ -68,7 +69,11 @@
 			<div><strong>Streak</strong><span>{stats.streak}</span></div>
 		</div>
 	{/if}
-	<ActivityBrowser activityId={activity.id} />
+	<Worksheet activityId={activity.id} />
+	<details class="browser-details">
+		<summary>Generated content</summary>
+		<ActivityBrowser activityId={activity.id} />
+	</details>
 {:else}
 	<p>No activity found.</p>
 {/if}
@@ -125,5 +130,15 @@
 
 	.error {
 		color: #b42318;
+	}
+
+	.browser-details {
+		margin-top: 1rem;
+	}
+	.browser-details summary {
+		cursor: pointer;
+		font-size: 0.8rem;
+		color: #555;
+		padding: 0.3rem 0;
 	}
 </style>
