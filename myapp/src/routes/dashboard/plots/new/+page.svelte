@@ -6,7 +6,7 @@
 	import Select from '$lib/components/ui/Select.svelte';
 
 	let name = $state('');
-	let l2_target = $state('');
+	let l2_target = $state('Spanish');
 	let proficiency = $state('A1');
 	let description = $state('');
 	let error = $state('');
@@ -32,7 +32,13 @@
 	<form onsubmit={(e) => { e.preventDefault(); handleCreate(); }}>
 		<Input bind:value={name} label="Plot name" placeholder="My Spanish Story" required />
 		<div class="row">
-			<Input bind:value={l2_target} label="Target language" placeholder="Spanish" required />
+			<Select bind:value={l2_target} label="Target language" required>
+				<option value="Spanish">Spanish</option>
+				<option value="French">French</option>
+				<option value="German">German</option>
+				<option value="Chinese">Chinese</option>
+				<option value="Korean">Korean</option>
+			</Select>
 			<Select bind:value={proficiency} label="Proficiency">
 				<option value="A1">A1 – Beginner</option>
 				<option value="A2">A2 – Elementary</option>
@@ -42,7 +48,7 @@
 				<option value="C2">C2 – Mastery</option>
 			</Select>
 		</div>
-		<Textarea bind:value={description} label="Description" placeholder="What's this plot about? (optional)" />
+		<Textarea bind:value={description} label="Description" placeholder="What's this plot about?" required />
 		{#if error}<p class="error">{error}</p>{/if}
 		<button type="submit" disabled={loading}>{loading ? 'Creating…' : 'Create Plot'}</button>
 	</form>
