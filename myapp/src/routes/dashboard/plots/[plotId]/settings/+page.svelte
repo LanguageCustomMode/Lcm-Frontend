@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Select from '$lib/components/ui/Select.svelte';
+	
 	let { data } = $props();
 
 	let name = $state(data.plot?.name ?? '');
@@ -55,7 +57,13 @@
 		</label>
 		<label>
 			Target language
-			<input bind:value={l2Target} />
+			<Select bind:value={l2_target} label="Target language" required>
+				<option value="Chinese">Chinese</option>
+				<option value="French">French</option>
+				<option value="German">German</option>
+				<option value="Korean">Korean</option>
+				<option value="Spanish">Spanish</option>
+			</Select>
 		</label>
 		<label>
 			Proficiency
