@@ -26,10 +26,18 @@
 	let corrections = $state<Correction[]>([]);
 	let error = $state<string | null>(null);
 	let sessionSummary = $state<SessionSummary | null>(null);
+	let sessionXp = $state(0);
+	let xpPulse = $state(0);
 
-	const startSession = async () => {
+	const startSession = async ({ forceNew = false }: { forceNew?: boolean } = {}) => {
+		sessionXp = 0;
+		xpPulse = 0;
+		corrections = [];
 		try {
-			const res = await fetch(`/api/llm/interact/${activity.id}/start`, {
+			const endpoint = forceNew
+				? `/api/llm/interact/${activity.id}/start`
+				: `/api/llm/interact/${activity.id}/start-or-resume`;
+			const res = await fetch(endpoint, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({})
@@ -37,7 +45,17 @@
 			if (!res.ok) throw new Error(await res.text());
 			const payload = await res.json();
 			sessionId = payload.session_id;
-			messages = [{ role: 'assistant', content: payload.message }];
+			if (payload.resumed) {
+				messages = (payload.messages ?? []).map((m: { role: string; content: string }) => ({
+					role: m.role === 'user' ? 'user' : 'assistant',
+					content: m.content ?? ''
+				}));
+				corrections = payload.errors ?? [];
+				sessionXp = Number(payload.xp_earned ?? 0);
+			} else {
+				const opening = payload.opening_message ?? payload.message ?? '';
+				messages = opening ? [{ role: 'assistant', content: opening }] : [];
+			}
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to start session';
 		}
@@ -75,6 +93,20 @@
 						corrections = [{ raw: event.data }];
 					}
 				}
+				if (event.event === 'xp') {
+					try {
+						const parsed = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+						const delta = Number(parsed?.delta ?? 0);
+						const total = Number(parsed?.session_total ?? sessionXp);
+						sessionXp = total;
+						if (delta > 0) {
+							xpPulse = delta;
+							setTimeout(() => { xpPulse = 0; }, 1500);
+						}
+					} catch {
+						// ignore malformed xp event
+					}
+				}
 				if (event.event === 'done') {
 					loading = false;
 				}
@@ -98,7 +130,7 @@
 		}
 	};
 
-	onMount(startSession);
+	onMount(() => { startSession(); });
 </script>
 
 <h1>Practice</h1>
@@ -125,12 +157,18 @@
 				{/each}
 			</ul>
 		{/if}
-		<button type="button" onclick={() => { sessionSummary = null; corrections = []; startSession(); }}>New Session</button>
+		<button type="button" onclick={() => { sessionSummary = null; corrections = []; startSession({ forceNew: true }); }}>New Session</button>
 	</div>
 {:else}
 	<div class="practice-layout">
 		<ChatWindow {messages} {loading} onsend={sendMessage} />
 		<div class="panel">
+			<div class="xp-live">
+				<span class="xp-total">{sessionXp} XP</span>
+				{#if xpPulse > 0}
+					<span class="xp-pulse">+{xpPulse}</span>
+				{/if}
+			</div>
 			<h3>Corrections</h3>
 			{#if corrections.length === 0}
 				<p class="empty-note">No corrections yet.</p>
@@ -257,6 +295,31 @@
 	.summary-text {
 		color: #555;
 		font-size: 0.9rem;
+	}
+
+	.xp-live {
+		display: flex;
+		align-items: baseline;
+		gap: 0.5rem;
+	}
+
+	.xp-total {
+		font-size: 1rem;
+		font-weight: 700;
+		color: var(--color-accent);
+	}
+
+	.xp-pulse {
+		font-size: 0.85rem;
+		font-weight: 700;
+		color: #0f766e;
+		animation: xp-pop 1.2s ease-out;
+	}
+
+	@keyframes xp-pop {
+		0% { transform: translateY(0); opacity: 0; }
+		20% { transform: translateY(-6px); opacity: 1; }
+		100% { transform: translateY(-14px); opacity: 0; }
 	}
 
 	.xp-badge {
