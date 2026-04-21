@@ -120,8 +120,8 @@
 			<textarea bind:value={text} rows="4" placeholder="Paste text to upload (optional)"></textarea>
 		</label>
 		<label class="file">
-			Upload file
-			<input type="file" accept=".txt,.md,.pdf" on:change={handleFileChange} />
+			Upload file (supports .txt, .md)
+			<input type="file" accept=".txt,.md" on:change={handleFileChange} />
 		</label>
 		<button type="button" disabled={uploading} on:click={uploadReference}>
 			{uploading ? 'Uploading...' : 'Upload Reference'}
