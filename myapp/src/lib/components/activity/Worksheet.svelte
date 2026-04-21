@@ -8,11 +8,21 @@
 		kind?: 'question' | 'commentary';
 	}
 
-	interface Props {
-		activityId: string;
+	interface InitialState {
+		session_id: string;
+		messages: VisibleMessage[];
+		questions_asked: number;
+		max_questions: number;
+		complete: boolean;
 	}
 
-	let { activityId }: Props = $props();
+	interface Props {
+		activityId: string;
+		initialState?: InitialState | null;
+		disabled?: boolean;
+	}
+
+	let { activityId, initialState = null, disabled = false }: Props = $props();
 
 	let sessionId = $state<string | null>(null);
 	let messages = $state<VisibleMessage[]>([]);
@@ -53,7 +63,7 @@
 	};
 
 	const submitAnswer = async () => {
-		if (!sessionId || !answer.trim() || loading || complete) return;
+		if (!sessionId || !answer.trim() || loading || complete || disabled) return;
 		const text = answer.trim();
 		answer = '';
 		error = null;
@@ -113,7 +123,18 @@
 		}
 	};
 
-	onMount(startOrResume);
+	onMount(() => {
+		if (initialState) {
+			sessionId = initialState.session_id;
+			messages = (initialState.messages ?? []).filter((m) => m.role !== 'system');
+			questionsAsked = initialState.questions_asked ?? 0;
+			maxQuestions = initialState.max_questions ?? 10;
+			complete = !!initialState.complete;
+			scrollToBottom();
+			return;
+		}
+		startOrResume();
+	});
 </script>
 
 <div class="worksheet">
@@ -148,20 +169,24 @@
 		{/if}
 	</div>
 
-	{#if complete}
+	{#if complete || disabled}
 		<div class="complete-banner">
-			Worksheet complete — content is being generated from your answers.
+			{#if complete}
+				Worksheet complete — content is being generated from your answers.
+			{:else}
+				This worksheet is read-only.
+			{/if}
 		</div>
 	{:else}
 		<textarea
 			bind:value={answer}
 			placeholder="Your answer (⌘/Ctrl+Enter to submit)"
-			disabled={loading || complete}
+			disabled={loading || complete || disabled}
 			onkeydown={handleKeydown}
 			rows="3"
 		></textarea>
 		<div class="actions">
-			<button type="button" disabled={loading || !answer.trim()} onclick={submitAnswer}>
+			<button type="button" disabled={loading || !answer.trim() || disabled} onclick={submitAnswer}>
 				{loading ? 'Sending…' : 'Submit answer'}
 			</button>
 		</div>

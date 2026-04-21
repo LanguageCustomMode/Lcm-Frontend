@@ -25,6 +25,26 @@
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let activeTab = $state<'overview' | 'modify'>('overview');
+	let worksheetState = $state<WorksheetInitialState | null>(null);
+
+	interface WorksheetInitialState {
+		session_id: string;
+		messages: { role: 'user' | 'assistant' | 'system'; content: string; kind?: 'question' | 'commentary' }[];
+		questions_asked: number;
+		max_questions: number;
+		complete: boolean;
+	}
+
+	const hasWorksheet = $derived(
+		!!activity && activity.type !== 'generic_conversation' && activity.type !== 'errors_srs'
+	);
+	const hasModifyTab = $derived(!!activity && activity.type !== 'generic_conversation');
+	const worksheetComplete = $derived(!!worksheetState?.complete);
+	// errors_srs has no worksheet → expand generated content.
+	// regular activities expand generated content once the worksheet is done.
+	const generatedContentOpen = $derived(
+		!!activity && (!hasWorksheet || worksheetComplete)
+	);
 
 	const loadActivity = async () => {
 		loading = true;
@@ -35,6 +55,13 @@
 			activity = await res.json();
 			const statsRes = await fetch(`/api/activities/${$page.params.activityId}/stats`);
 			if (statsRes.ok) stats = await statsRes.json();
+			if (hasWorksheet) {
+				const wsRes = await fetch(
+					`/api/llm/worksheet/${$page.params.activityId}/start-or-resume`,
+					{ method: 'POST' }
+				);
+				if (wsRes.ok) worksheetState = await wsRes.json();
+			}
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to load activity';
 		} finally {
@@ -92,23 +119,33 @@
 		>
 			Overview
 		</button>
-		<button
-			type="button"
-			role="tab"
-			aria-selected={activeTab === 'modify'}
-			class:active={activeTab === 'modify'}
-			onclick={() => (activeTab = 'modify')}
-		>
-			Modify
-		</button>
+		{#if hasModifyTab}
+			<button
+				type="button"
+				role="tab"
+				aria-selected={activeTab === 'modify'}
+				class:active={activeTab === 'modify'}
+				onclick={() => (activeTab = 'modify')}
+			>
+				Modify
+			</button>
+		{/if}
 	</div>
 
 	{#if activeTab === 'overview'}
-		<Worksheet activityId={activity.id} />
-		<details class="browser-details">
+		{#if hasWorksheet && !worksheetComplete}
+			<Worksheet activityId={activity.id} initialState={worksheetState} />
+		{/if}
+		<details class="browser-details" open={generatedContentOpen}>
 			<summary>Generated content</summary>
 			<ActivityBrowser activityId={activity.id} />
 		</details>
+		{#if hasWorksheet && worksheetComplete}
+			<details class="browser-details">
+				<summary>Worksheet (completed)</summary>
+				<Worksheet activityId={activity.id} initialState={worksheetState} disabled />
+			</details>
+		{/if}
 	{:else}
 		<ModifyTab activityId={activity.id} />
 	{/if}
