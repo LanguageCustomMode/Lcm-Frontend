@@ -59,42 +59,44 @@
 	{/if}
 </div>
 
-{#if data.plot}
-	<Modal bind:open={quickCreateOpen} title="Add activity">
-		{#if quickCreateOpen}
-			<QuickCreatePanel
-				plotId={data.plot.id}
-				row={quickCreateRow}
-				col={quickCreateCol}
-				onclose={() => (quickCreateOpen = false)}
-				oncreated={handleQuickCreated}
-			/>
-		{/if}
-	</Modal>
+{#key data.plot?.id}
+	{#if data.plot}
+		<Modal bind:open={quickCreateOpen} title="Add activity">
+			{#if quickCreateOpen}
+				<QuickCreatePanel
+					plotId={data.plot.id}
+					row={quickCreateRow}
+					col={quickCreateCol}
+					onclose={() => (quickCreateOpen = false)}
+					oncreated={handleQuickCreated}
+				/>
+			{/if}
+		</Modal>
 
-	<div class="farmgrid-wrap">
-		<FarmGrid
-			rows={data.plot.grid_rows}
-			cols={data.plot.grid_cols}
-			activities={data.plot.activities ?? []}
-			plotId={data.plot.id}
-			oncellclick={handleCellClick}
-			onactivityclick={handleActivityClick}
-			onactivitymoved={handleActivityMoved}
-		/>
-	</div>
-
-	<div class="top-split-wrap">
-		<div class="top-split">
-			<PlotDoc bind:this={plotDocRef} plotId={data.plot.id} />
-			<DesignChat
+		<div class="farmgrid-wrap">
+			<FarmGrid
+				rows={data.plot.grid_rows}
+				cols={data.plot.grid_cols}
+				activities={data.plot.activities ?? []}
 				plotId={data.plot.id}
-				onplotdocupdate={handlePlotDocUpdate}
-				onwishlistadd={handleWishlistAdd}
+				oncellclick={handleCellClick}
+				onactivityclick={handleActivityClick}
+				onactivitymoved={handleActivityMoved}
 			/>
 		</div>
-	</div>
-{/if}
+
+		<div class="top-split-wrap">
+			<div class="top-split">
+				<PlotDoc bind:this={plotDocRef} plotId={data.plot.id} />
+				<DesignChat
+					plotId={data.plot.id}
+					onplotdocupdate={handlePlotDocUpdate}
+					onwishlistadd={handleWishlistAdd}
+				/>
+			</div>
+		</div>
+	{/if}
+{/key}
 
 <style>
 	.plot-header {
