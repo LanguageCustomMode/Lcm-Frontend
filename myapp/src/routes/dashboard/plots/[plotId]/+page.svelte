@@ -60,25 +60,6 @@
 </div>
 
 {#if data.plot}
-	<div class="top-split">
-		<PlotDoc bind:this={plotDocRef} plotId={data.plot.id} />
-		<DesignChat
-			plotId={data.plot.id}
-			onplotdocupdate={handlePlotDocUpdate}
-			onwishlistadd={handleWishlistAdd}
-		/>
-	</div>
-
-	<FarmGrid
-		rows={data.plot.grid_rows}
-		cols={data.plot.grid_cols}
-		activities={data.plot.activities ?? []}
-		plotId={data.plot.id}
-		oncellclick={handleCellClick}
-		onactivityclick={handleActivityClick}
-		onactivitymoved={handleActivityMoved}
-	/>
-
 	<Modal bind:open={quickCreateOpen} title="Add activity">
 		{#if quickCreateOpen}
 			<QuickCreatePanel
@@ -90,6 +71,29 @@
 			/>
 		{/if}
 	</Modal>
+
+	<div class="farmgrid-wrap">
+		<FarmGrid
+			rows={data.plot.grid_rows}
+			cols={data.plot.grid_cols}
+			activities={data.plot.activities ?? []}
+			plotId={data.plot.id}
+			oncellclick={handleCellClick}
+			onactivityclick={handleActivityClick}
+			onactivitymoved={handleActivityMoved}
+		/>
+	</div>
+
+	<div class="top-split-wrap">
+		<div class="top-split">
+			<PlotDoc bind:this={plotDocRef} plotId={data.plot.id} />
+			<DesignChat
+				plotId={data.plot.id}
+				onplotdocupdate={handlePlotDocUpdate}
+				onwishlistadd={handleWishlistAdd}
+			/>
+		</div>
+	</div>
 {/if}
 
 <style>
@@ -128,6 +132,12 @@
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: 1rem;
+	}
+	.farmgrid-wrap {
+		margin-top: 1rem;
+		margin-bottom: 1rem;
+	}
+	.top-split-wrap {
 		margin-bottom: 1rem;
 	}
 	@media (max-width: 900px) {

@@ -200,7 +200,6 @@
 		min-width: min(860px, 90vw);
 	}
 	.panel {
-		background: #fafaf6;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius);
 		padding: 0.85rem;
@@ -210,6 +209,12 @@
 		min-height: 340px;
 		max-height: 60vh;
 		overflow: hidden;
+	}
+	.wishlist-panel {
+		background: white;
+	}
+	.form-panel {
+		background: white;
 	}
 	.panel-header {
 		display: flex;
@@ -235,19 +240,19 @@
 		overflow-y: auto;
 		display: flex;
 		flex-direction: column;
-		gap: 0.35rem;
+		gap: 0.6rem;
 	}
 	.wishlist-panel li {
 		position: relative;
-		padding: 0.5rem 0.6rem;
-		background: white;
+		padding: 0.6rem 0.7rem;
+		background: #fffef8;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius);
 		cursor: pointer;
 	}
 	.wishlist-panel li.selected {
 		border-color: var(--color-primary);
-		background: #f4faf4;
+		background: #eef8ef;
 	}
 	.item-title {
 		font-size: 0.85rem;
