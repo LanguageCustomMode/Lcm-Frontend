@@ -7,11 +7,6 @@ export interface Profile {
 	level: number;
 }
 
-export interface UserSettings {
-	llm_provider: string | null;
-	llm_api_key_set: boolean;
-}
-
 export interface Plot {
 	id: string;
 	name: string;
