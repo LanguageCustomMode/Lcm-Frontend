@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ActivityBrowser from '$lib/components/activity/ActivityBrowser.svelte';
+	import ModifyTab from '$lib/components/activity/ModifyTab.svelte';
 	import Worksheet from '$lib/components/activity/Worksheet.svelte';
 	import { onMount } from 'svelte';
 	import type { Activity, ActivityStats, FlowType } from '$lib/types';
@@ -23,6 +24,7 @@
 	let stats = $state<ActivityStats | null>(null);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
+	let activeTab = $state<'overview' | 'modify'>('overview');
 
 	const loadActivity = async () => {
 		loading = true;
@@ -79,11 +81,37 @@
 			<div><strong>Streak</strong><span>{stats.streak}</span></div>
 		</div>
 	{/if}
-	<Worksheet activityId={activity.id} />
-	<details class="browser-details">
-		<summary>Generated content</summary>
-		<ActivityBrowser activityId={activity.id} />
-	</details>
+
+	<div class="tabs" role="tablist">
+		<button
+			type="button"
+			role="tab"
+			aria-selected={activeTab === 'overview'}
+			class:active={activeTab === 'overview'}
+			on:click={() => (activeTab = 'overview')}
+		>
+			Overview
+		</button>
+		<button
+			type="button"
+			role="tab"
+			aria-selected={activeTab === 'modify'}
+			class:active={activeTab === 'modify'}
+			on:click={() => (activeTab = 'modify')}
+		>
+			Modify
+		</button>
+	</div>
+
+	{#if activeTab === 'overview'}
+		<Worksheet activityId={activity.id} />
+		<details class="browser-details">
+			<summary>Generated content</summary>
+			<ActivityBrowser activityId={activity.id} />
+		</details>
+	{:else}
+		<ModifyTab activityId={activity.id} />
+	{/if}
 {:else}
 	<p>No activity found.</p>
 {/if}
@@ -140,6 +168,28 @@
 
 	.error {
 		color: #b42318;
+	}
+
+	.tabs {
+		display: flex;
+		gap: 0.3rem;
+		border-bottom: 1px solid var(--color-border);
+		margin: 1rem 0;
+	}
+	.tabs button {
+		background: transparent;
+		color: #555;
+		border: none;
+		border-bottom: 2px solid transparent;
+		border-radius: 0;
+		padding: 0.5rem 0.9rem;
+		cursor: pointer;
+		font-size: 0.85rem;
+	}
+	.tabs button.active {
+		color: var(--color-primary);
+		border-bottom-color: var(--color-primary);
+		font-weight: 600;
 	}
 
 	.browser-details {
