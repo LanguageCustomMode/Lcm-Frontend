@@ -88,7 +88,7 @@
 			role="tab"
 			aria-selected={activeTab === 'overview'}
 			class:active={activeTab === 'overview'}
-			on:click={() => (activeTab = 'overview')}
+			onclick={() => (activeTab = 'overview')}
 		>
 			Overview
 		</button>
@@ -97,7 +97,7 @@
 			role="tab"
 			aria-selected={activeTab === 'modify'}
 			class:active={activeTab === 'modify'}
-			on:click={() => (activeTab = 'modify')}
+			onclick={() => (activeTab = 'modify')}
 		>
 			Modify
 		</button>
