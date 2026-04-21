@@ -12,6 +12,16 @@
 	let error = $state<string | null>(null);
 	let audioUrl = $state<string | null>(null);
 	let audioEl: HTMLAudioElement | null = $state(null);
+	let cachedFor = $state<string | null>(null);
+
+	$effect(() => {
+		if (cachedFor !== null && cachedFor !== text) {
+			if (audioUrl) URL.revokeObjectURL(audioUrl);
+			audioUrl = null;
+			cachedFor = null;
+			error = null;
+		}
+	});
 
 	const play = async () => {
 		error = null;
@@ -29,6 +39,7 @@
 			if (!res.ok) throw new Error(await res.text());
 			const blob = await res.blob();
 			audioUrl = URL.createObjectURL(blob);
+			cachedFor = text;
 			await new Promise((r) => setTimeout(r, 0));
 			audioEl?.play();
 		} catch (err) {
