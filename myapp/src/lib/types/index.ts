@@ -1,6 +1,6 @@
 export type { Profile, UserSettings } from './plot';
 export type { Plot, PlotDetail, PlotComposition, Idea } from './plot';
-export type { Activity, ActivityStats, ActivityType } from './activity';
+export type { Activity, ActivityStats, ActivityType, FlowType } from './activity';
 export type { Card, ReviewSession, ReviewSummary } from './card';
 export type {
 	ContentItem,

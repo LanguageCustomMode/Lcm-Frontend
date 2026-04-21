@@ -14,6 +14,16 @@ export type ActivityType =
 	| 'errors_srs'
 	| 'generic_conversation';
 
+export type FlowType =
+	| 'flashcard_review'
+	| 'flashcard_audio'
+	| 'audiocard_review'
+	| 'mcq_review'
+	| 'conversation'
+	| 'writing_chat'
+	| 'reading_chat'
+	| 'tutor_chat';
+
 export interface Activity {
 	id: string;
 	plot_id: string;
@@ -24,6 +34,7 @@ export interface Activity {
 	parent_activity_id?: string;
 	xp: number;
 	level: number;
+	supported_flows?: FlowType[];
 }
 
 export interface ActivityStats {

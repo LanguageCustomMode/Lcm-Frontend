@@ -2,9 +2,20 @@
 	import ActivityBrowser from '$lib/components/activity/ActivityBrowser.svelte';
 	import Worksheet from '$lib/components/activity/Worksheet.svelte';
 	import { onMount } from 'svelte';
-	import type { Activity, ActivityStats } from '$lib/types';
+	import type { Activity, ActivityStats, FlowType } from '$lib/types';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+
+	const FLOW_LABELS: Record<FlowType, string> = {
+		flashcard_review: 'Review',
+		flashcard_audio: 'Pronunciation',
+		audiocard_review: 'Listening',
+		mcq_review: 'MCQ',
+		conversation: 'Practice',
+		writing_chat: 'Writing',
+		reading_chat: 'Reading',
+		tutor_chat: 'Tutor'
+	};
 
 	let { data } = $props();
 
@@ -45,15 +56,14 @@
 			<p class="meta">{activity.type.replace(/_/g, ' ')}</p>
 		</div>
 		<div class="actions">
-			<button type="button" onclick={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity!.id}/review`)}>
-				Review
-			</button>
-			<button
-				type="button"
-				onclick={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity!.id}/interact`)}
-			>
-				Practice
-			</button>
+			{#each activity.supported_flows ?? [] as flow}
+				<button
+					type="button"
+					onclick={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity!.id}/flows/${flow}`)}
+				>
+					{FLOW_LABELS[flow] ?? flow}
+				</button>
+			{/each}
 			<button type="button" onclick={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity!.id}/edit`)}>
 				Edit
 			</button>

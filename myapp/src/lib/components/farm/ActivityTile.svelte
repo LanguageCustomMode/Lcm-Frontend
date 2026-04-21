@@ -1,13 +1,34 @@
 <script lang="ts">
-	import type { Activity } from '$lib/types';
+	import { goto } from '$app/navigation';
+	import type { Activity, FlowType } from '$lib/types';
 
 	interface Props {
 		activity: Activity;
 		ripeness?: number;
+		plotId?: string;
 		onclick?: () => void;
 	}
 
-	let { activity, ripeness = 0, onclick }: Props = $props();
+	let { activity, ripeness = 0, plotId, onclick }: Props = $props();
+
+	const FLOW_ICONS: Record<FlowType, string> = {
+		flashcard_review: '🃏',
+		flashcard_audio: '🎤',
+		audiocard_review: '🎧',
+		mcq_review: '☑️',
+		conversation: '💬',
+		writing_chat: '✍️',
+		reading_chat: '📖',
+		tutor_chat: '🧑‍🏫'
+	};
+
+	const primaryFlow = $derived(activity.supported_flows?.[0]);
+
+	const handleQuickJump = (event: MouseEvent) => {
+		event.stopPropagation();
+		if (!plotId || !primaryFlow) return;
+		goto(`/dashboard/plots/${plotId}/activities/${activity.id}/flows/${primaryFlow}`);
+	};
 
 	const formatType = (value?: string) => (value ? value.replace(/_/g, ' ') : '');
 	const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -34,7 +55,19 @@
 	onkeydown={handleKey}
 	style={`background: ${backgroundForRipeness(ripeness)}`}
 >
-	<div class="title">{activity.name}</div>
+	<div class="title-row">
+		<div class="title">{activity.name}</div>
+		{#if plotId && primaryFlow}
+			<button
+				type="button"
+				class="quick-jump"
+				title={`Start ${primaryFlow.replace(/_/g, ' ')}`}
+				onclick={handleQuickJump}
+			>
+				{FLOW_ICONS[primaryFlow] ?? '▶'}
+			</button>
+		{/if}
+	</div>
 	<div class="meta">
 		<span class="badge">{formatType(activity.type)}</span>
 	</div>
@@ -68,9 +101,37 @@
 		outline: none;
 	}
 
+	.title-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.4rem;
+	}
+
 	.title {
 		font-weight: 600;
 		font-size: 0.95rem;
+		flex: 1;
+		min-width: 0;
+	}
+
+	.quick-jump {
+		background: rgba(255, 255, 255, 0.85);
+		border: 1px solid var(--color-border);
+		border-radius: 999px;
+		width: 1.6rem;
+		height: 1.6rem;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.85rem;
+		cursor: pointer;
+		padding: 0;
+		line-height: 1;
+	}
+
+	.quick-jump:hover {
+		background: white;
 	}
 
 	.meta {
