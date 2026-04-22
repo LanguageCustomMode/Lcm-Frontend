@@ -28,21 +28,6 @@
 
 	let { plotId, row, col, onclose, oncreated }: Props = $props();
 
-	const activityTypes: ActivityType[] = [
-		'vocabulary',
-		'grammar_theory',
-		'grammar_processing',
-		'cultural_knowledge',
-		'template_sentences',
-		'grammar_manipulations',
-		'fundamentals',
-		'reading',
-		'dialogue',
-		'writing_practice',
-		'pronunciation',
-		'listening'
-	];
-
 	let wishlist = $state<WishlistItem[]>([]);
 	let references = $state<RagSource[]>([]);
 	let title = $state('');
@@ -166,9 +151,25 @@
 		<label>
 			Type
 			<select bind:value={type}>
-				{#each activityTypes as t}
-					<option value={t}>{t.replace(/_/g, ' ')}</option>
-				{/each}
+				<optgroup label="General Knowledge">
+					<option value="fundamentals">Fundamentals</option>
+					<option value="cultural_knowledge">Cultural Knowledge</option>
+				</optgroup>
+				<optgroup label="Lexical Skills">
+					<option value="vocabulary">Vocabulary</option>
+					<option value="listening">Listening</option>
+					<option value="pronunciation">Pronunciation</option>
+				</optgroup>
+				<optgroup label="Grammar">
+					<option value="grammar_theory">Theory</option>
+					<option value="grammar_processing">Processing</option>
+					<option value="grammar_manipulations">Manipulations</option>
+				</optgroup>
+				<optgroup label="Activities">
+					<option value="reading">Reading</option>
+					<option value="dialogue">Dialogue</option>
+					<option value="writing_practice">Writing</option>
+				</optgroup>
 			</select>
 		</label>
 		{#if needsRag}
