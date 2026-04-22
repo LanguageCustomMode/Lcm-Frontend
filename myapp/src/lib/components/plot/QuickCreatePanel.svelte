@@ -157,6 +157,7 @@
 				</optgroup>
 				<optgroup label="Lexical Skills">
 					<option value="vocabulary">Vocabulary</option>
+					<option value="template_sentences">Template Sentences</option>
 					<option value="listening">Listening</option>
 					<option value="pronunciation">Pronunciation</option>
 				</optgroup>
