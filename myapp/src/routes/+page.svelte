@@ -5,7 +5,10 @@
 <div class="page">
 	<header class="nav">
 		<div class="nav-inner">
-			<a class="brand" href="/">LanguageFarm</a>
+			<a class="brand" href="/">
+				<span class="brand-mark">绿</span>
+				<span class="brand-name">LanguageFarm</span>
+			</a>
 			<div class="nav-actions">
 				{#if data.session}
 					<a class="btn btn-primary btn-md" href="/dashboard">Dashboard</a>
@@ -23,7 +26,7 @@
 			<h1>Cultivate a language like you'd tend a garden.</h1>
 			<p class="lede">
 				LanguageFarm turns vocabulary, grammar, and comprehension into plots you plant, water,
-				and harvest — adaptive review, AI-generated practice, and real texts in one calm,
+				and harvest. Adaptive review, AI-generated practice, and real texts — all in one calm,
 				focused workspace.
 			</p>
 			<div class="hero-cta">
@@ -34,90 +37,122 @@
 				{/if}
 			</div>
 		</div>
-	</section>
-
-	<section class="feature-row">
-		<div class="feature-text">
-			<span class="eyebrow">Spaced repetition</span>
-			<h2>Review what matters, exactly when you'd forget it.</h2>
-			<p>
-				LanguageFarm schedules every word, phrase, and pattern on its own curve. Your daily
-				session stays short, but nothing slips through the cracks — the hard items come back,
-				the easy ones step aside.
-			</p>
-		</div>
-		<div class="feature-art art-1" aria-hidden="true">
-			<div class="card">
-				<div class="card-head">Today's review</div>
-				<div class="bar"><span style="width: 82%"></span></div>
-				<div class="bar"><span style="width: 64%"></span></div>
-				<div class="bar"><span style="width: 91%"></span></div>
-				<div class="bar"><span style="width: 47%"></span></div>
+		<div class="hero-art" aria-hidden="true">
+			<div class="plot plot-1">
+				<div class="plot-label">Vocabulary</div>
+				<div class="plot-bar"><span style="width: 82%"></span></div>
+			</div>
+			<div class="plot plot-2">
+				<div class="plot-label">Grammar</div>
+				<div class="plot-bar"><span style="width: 64%"></span></div>
+			</div>
+			<div class="plot plot-3">
+				<div class="plot-label">Listening</div>
+				<div class="plot-bar"><span style="width: 47%"></span></div>
+			</div>
+			<div class="plot plot-4">
+				<div class="plot-label">Reading</div>
+				<div class="plot-bar"><span style="width: 73%"></span></div>
 			</div>
 		</div>
 	</section>
 
-	<section class="feature-row reverse">
-		<div class="feature-text">
-			<span class="eyebrow">AI-generated practice</span>
-			<h2>Fresh exercises built from your own vocabulary.</h2>
-			<p>
-				Cloze passages, dialogues, worksheets, and listening drills are generated on demand at
-				your level — using words you're actually learning. No more generic textbook fillers.
-			</p>
+	<section class="features" id="features">
+		<div class="section-head">
+			<h2>Everything you need to grow</h2>
+			<p>Tools built on research in second-language acquisition — not gamified busywork.</p>
 		</div>
-		<div class="feature-art art-2" aria-hidden="true">
-			<div class="card">
-				<div class="card-head">Cloze — B1 German</div>
-				<p class="faux-line">Ich ___ gestern ins Kino gegangen.</p>
-				<p class="faux-line faux-dim">bin · habe · war</p>
-				<p class="faux-line">Der Film ___ sehr spannend.</p>
-				<p class="faux-line faux-dim">war · ist · sei</p>
-			</div>
+		<div class="feature-grid">
+			<article class="feature">
+				<div class="feature-icon">🌾</div>
+				<h3>Smart spaced repetition</h3>
+				<p>
+					FSRS-based scheduling adapts to your memory, showing each item exactly when you're
+					about to forget it.
+				</p>
+			</article>
+			<article class="feature">
+				<div class="feature-icon">✨</div>
+				<h3>AI-generated practice</h3>
+				<p>
+					Worksheets, cloze exercises, and dialogues generated on demand from your own
+					vocabulary and level.
+				</p>
+			</article>
+			<article class="feature">
+				<div class="feature-icon">📚</div>
+				<h3>Read real texts</h3>
+				<p>
+					Import articles and stories. Tap any word to see meaning, conjugation, and add it
+					straight to your review deck.
+				</p>
+			</article>
+			<article class="feature">
+				<div class="feature-icon">🎧</div>
+				<h3>Listening plots</h3>
+				<p>
+					Train your ear with transcripts, shadowing tasks, and pronunciation feedback tuned
+					to your target language.
+				</p>
+			</article>
+			<article class="feature">
+				<div class="feature-icon">🗂️</div>
+				<h3>Organized your way</h3>
+				<p>
+					Drag-and-drop decks, tags, and activity sequences. Structure lessons like a
+					teacher, study them like a learner.
+				</p>
+			</article>
+			<article class="feature">
+				<div class="feature-icon">📈</div>
+				<h3>Honest progress</h3>
+				<p>
+					See retention, coverage, and time-on-task — the metrics that actually predict
+					fluency, not vanity streaks.
+				</p>
+			</article>
 		</div>
 	</section>
 
-	<section class="feature-row">
-		<div class="feature-text">
-			<span class="eyebrow">Read real texts</span>
-			<h2>Turn articles and stories into study material.</h2>
-			<p>
-				Paste anything you want to read. Tap a word to see meaning, conjugation, and examples,
-				then add it straight to your review deck. Your library grows with what you actually
-				care about.
-			</p>
+	<section class="how" id="how">
+		<div class="section-head">
+			<h2>Three steps to a working practice</h2>
 		</div>
-		<div class="feature-art art-3" aria-hidden="true">
-			<div class="card">
-				<div class="card-head">Der Tagesspiegel</div>
-				<p class="faux-line">Die <mark>Aufmerksamkeit</mark> der Leserinnen …</p>
-				<p class="faux-line faux-dim">noun · die · attention, awareness</p>
-				<p class="faux-line">… wurde auf das <mark>Ereignis</mark> gelenkt.</p>
-			</div>
-		</div>
-	</section>
-
-	<section class="feature-row reverse">
-		<div class="feature-text">
-			<span class="eyebrow">Honest progress</span>
-			<h2>Metrics that predict fluency, not streaks.</h2>
-			<p>
-				Track retention, coverage, and time on task across skills. See what's sticking and
-				what's slipping — the numbers reflect the work, not the noise.
-			</p>
-		</div>
-		<div class="feature-art art-4" aria-hidden="true">
-			<div class="card">
-				<div class="card-head">This week</div>
-				<div class="stat"><span>Retention</span><b>87%</b></div>
-				<div class="stat"><span>New items</span><b>42</b></div>
-				<div class="stat"><span>Time on task</span><b>2h 14m</b></div>
-			</div>
-		</div>
+		<ol class="steps">
+			<li>
+				<span class="step-num">1</span>
+				<h3>Plant your plots</h3>
+				<p>Pick a language and level. Import a deck, a text, or just a list of words you want to learn.</p>
+			</li>
+			<li>
+				<span class="step-num">2</span>
+				<h3>Water daily</h3>
+				<p>Ten to twenty minutes a day of mixed review, reading, and generated activities — guided, not grinding.</p>
+			</li>
+			<li>
+				<span class="step-num">3</span>
+				<h3>Harvest fluency</h3>
+				<p>Track what's stuck and what's slipping. Export decks, share progress, keep growing.</p>
+			</li>
+		</ol>
 	</section>
 
 	<footer class="footer">
-		© {new Date().getFullYear()} LanguageFarm
+		<div class="footer-cta">
+			<h2>Your next fluent language is one quiet habit away.</h2>
+			{#if data.session}
+				<a class="btn btn-primary btn-lg" href="/dashboard">Open your farm</a>
+			{:else}
+				<a class="btn btn-primary btn-lg" href="/auth/signup">Create a free account</a>
+			{/if}
+		</div>
+		<div class="footer-bottom">
+			<div class="brand">
+				<span class="brand-mark">绿</span>
+				<span class="brand-name">LanguageFarm</span>
+			</div>
+			<span>© {new Date().getFullYear()} LanguageFarm. Grown with care.</span>
+		</div>
 	</footer>
 </div>
 
@@ -138,34 +173,43 @@
 		border-bottom: 1px solid var(--color-border);
 	}
 	.nav-inner {
-		max-width: 1080px;
+		max-width: 1120px;
 		margin: 0 auto;
 		padding: 0.9rem 1.25rem;
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
+		gap: 2rem;
 	}
 	.brand {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
 		text-decoration: none;
 		color: var(--color-text);
 		font-weight: 600;
+	}
+	.brand-mark {
+		font-size: 1.3rem;
+	}
+	.brand-name {
 		font-size: 1.05rem;
 		letter-spacing: -0.01em;
 	}
 	.nav-actions {
 		display: flex;
 		gap: 0.5rem;
+		margin-left: auto;
 	}
 
 	/* Hero */
 	.hero {
-		padding: 6rem 1.25rem 5rem;
-	}
-	.hero-inner {
-		max-width: 720px;
+		max-width: 1120px;
 		margin: 0 auto;
-		text-align: center;
+		padding: 5rem 1.25rem 4rem;
+		display: grid;
+		grid-template-columns: 1.1fr 1fr;
+		gap: 3rem;
+		align-items: center;
 	}
 	.eyebrow {
 		display: inline-block;
@@ -177,7 +221,7 @@
 		margin-bottom: 1rem;
 	}
 	.hero h1 {
-		font-size: clamp(2rem, 4.2vw, 3.25rem);
+		font-size: clamp(2rem, 4vw, 3.25rem);
 		line-height: 1.1;
 		letter-spacing: -0.02em;
 		margin-bottom: 1.25rem;
@@ -186,151 +230,200 @@
 		font-size: 1.1rem;
 		line-height: 1.6;
 		color: #444;
-		margin: 0 auto 2rem;
-		max-width: 38rem;
+		max-width: 36rem;
+		margin-bottom: 2rem;
 	}
 	.hero-cta {
 		display: flex;
 		gap: 0.75rem;
-		justify-content: center;
-	}
-
-	/* Feature rows */
-	.feature-row {
-		max-width: 1080px;
-		margin: 0 auto;
-		padding: 5rem 1.25rem;
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 4rem;
-		align-items: center;
-	}
-	.feature-row.reverse .feature-text {
-		order: 2;
-	}
-	.feature-text h2 {
-		font-size: clamp(1.5rem, 2.4vw, 2rem);
-		line-height: 1.2;
-		letter-spacing: -0.015em;
+		flex-wrap: wrap;
 		margin-bottom: 1rem;
 	}
-	.feature-text p {
-		font-size: 1rem;
-		line-height: 1.65;
-		color: #444;
+	.hero-note {
+		font-size: 0.85rem;
+		color: #777;
 	}
 
-	.feature-art {
-		border-radius: 16px;
-		padding: 2rem;
-		min-height: 260px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border: 1px solid var(--color-border);
-		box-shadow: 0 10px 40px -20px rgba(0, 0, 0, 0.15);
-	}
-	.art-1 {
+	.hero-art {
 		background: linear-gradient(160deg, #eef5ec, #f7f0dd);
-	}
-	.art-2 {
-		background: linear-gradient(160deg, #f3efe4, #e8f0ee);
-	}
-	.art-3 {
-		background: linear-gradient(160deg, #f1eadd, #ecf3e8);
-	}
-	.art-4 {
-		background: linear-gradient(160deg, #e8f0ee, #faf3e4);
-	}
-
-	.card {
-		background: #fff;
 		border: 1px solid var(--color-border);
-		border-radius: 12px;
-		padding: 1.25rem 1.4rem;
-		width: 100%;
-		max-width: 340px;
+		border-radius: 16px;
+		padding: 1.75rem;
 		display: flex;
 		flex-direction: column;
-		gap: 0.7rem;
+		gap: 1rem;
+		box-shadow: 0 10px 40px -20px rgba(74, 124, 89, 0.3);
 	}
-	.card-head {
-		font-size: 0.82rem;
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		color: #888;
-		font-weight: 600;
-		margin-bottom: 0.3rem;
+	.plot {
+		background: #fff;
+		border: 1px solid var(--color-border);
+		border-radius: 10px;
+		padding: 0.9rem 1rem;
 	}
-	.bar {
+	.plot-label {
+		font-size: 0.85rem;
+		font-weight: 500;
+		margin-bottom: 0.5rem;
+		color: #333;
+	}
+	.plot-bar {
 		height: 8px;
 		background: #f0efe9;
 		border-radius: 999px;
 		overflow: hidden;
 	}
-	.bar span {
+	.plot-bar span {
 		display: block;
 		height: 100%;
 		background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
 		border-radius: 999px;
 	}
-	.faux-line {
-		font-size: 0.92rem;
-		color: #333;
-		line-height: 1.5;
+	.plot-3 .plot-bar span {
+		background: linear-gradient(90deg, var(--color-accent), #f2c56b);
 	}
-	.faux-dim {
-		color: #999;
-		font-size: 0.82rem;
+
+	/* Sections */
+	section.features,
+	section.how {
+		max-width: 1120px;
+		margin: 0 auto;
+		padding: 4.5rem 1.25rem;
+		width: 100%;
 	}
-	.card mark {
-		background: rgba(232, 168, 56, 0.25);
-		padding: 0 0.2rem;
-		border-radius: 3px;
-		color: inherit;
+	.section-head {
+		text-align: center;
+		margin-bottom: 2.5rem;
 	}
-	.stat {
-		display: flex;
-		justify-content: space-between;
-		align-items: baseline;
-		padding: 0.5rem 0;
-		border-bottom: 1px dashed #eee;
+	.section-head h2 {
+		font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+		letter-spacing: -0.015em;
+		margin-bottom: 0.5rem;
 	}
-	.stat:last-child {
-		border-bottom: none;
+	.section-head p {
+		color: #555;
+		font-size: 1rem;
 	}
-	.stat span {
-		color: #666;
-		font-size: 0.9rem;
+
+	/* Features grid */
+	.feature-grid {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 1.25rem;
 	}
-	.stat b {
-		font-size: 1.15rem;
-		font-weight: 600;
+	.feature {
+		background: #fff;
+		border: 1px solid var(--color-border);
+		border-radius: 12px;
+		padding: 1.5rem;
+		transition: transform 0.15s, box-shadow 0.15s;
+	}
+	.feature:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.12);
+	}
+	.feature-icon {
+		font-size: 1.6rem;
+		margin-bottom: 0.75rem;
+	}
+	.feature h3 {
+		font-size: 1.05rem;
+		margin-bottom: 0.4rem;
 		letter-spacing: -0.01em;
+	}
+	.feature p {
+		font-size: 0.92rem;
+		color: #555;
+		line-height: 1.55;
+	}
+
+	/* Steps */
+	.steps {
+		list-style: none;
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 1.5rem;
+		counter-reset: step;
+	}
+	.steps li {
+		position: relative;
+		padding: 1.5rem;
+		background: #fff;
+		border: 1px solid var(--color-border);
+		border-radius: 12px;
+	}
+	.step-num {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2rem;
+		height: 2rem;
+		border-radius: 999px;
+		background: var(--color-primary);
+		color: #fff;
+		font-weight: 600;
+		margin-bottom: 0.75rem;
+	}
+	.steps h3 {
+		font-size: 1.05rem;
+		margin-bottom: 0.35rem;
+	}
+	.steps p {
+		color: #555;
+		font-size: 0.92rem;
+		line-height: 1.55;
 	}
 
 	/* Footer */
 	.footer {
 		margin-top: auto;
-		padding: 2rem 1.25rem;
+		border-top: 1px solid var(--color-border);
+	}
+	.footer-cta {
+		background: linear-gradient(160deg, var(--color-primary), var(--color-primary-light));
+		color: #fff;
 		text-align: center;
+		padding: 4.5rem 1.25rem;
+	}
+	.footer-cta h2 {
+		font-size: clamp(1.5rem, 2.5vw, 2rem);
+		margin-bottom: 1.5rem;
+		letter-spacing: -0.015em;
+		max-width: 36rem;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	.footer-cta .btn-primary {
+		background: #fff;
+		color: var(--color-primary);
+	}
+	.footer-cta .btn-primary:hover {
+		background: #f5f5f0;
+	}
+	.footer-bottom {
+		max-width: 1120px;
+		margin: 0 auto;
+		padding: 1.25rem 1.25rem;
 		font-size: 0.85rem;
 		color: #888;
-		border-top: 1px solid var(--color-border);
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		flex-wrap: wrap;
 	}
 
 	/* Responsive */
-	@media (max-width: 780px) {
-		.feature-row {
-			grid-template-columns: 1fr;
-			gap: 2rem;
-			padding: 3.5rem 1.25rem;
-		}
-		.feature-row.reverse .feature-text {
-			order: 0;
+	@media (max-width: 860px) {
+		.nav-links {
+			display: none;
 		}
 		.hero {
-			padding: 4rem 1.25rem 3rem;
+			grid-template-columns: 1fr;
+			padding-top: 3rem;
+		}
+		.feature-grid,
+		.steps {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>
