@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import type { Activity, FlowType } from '$lib/types';
+	import type { Activity } from '$lib/types';
 
 	interface Props {
 		activity: Activity;
@@ -10,17 +10,6 @@
 	}
 
 	let { activity, ripeness = 0, plotId, onclick }: Props = $props();
-
-	const FLOW_ICONS: Record<FlowType, string> = {
-		flashcard_review: '🃏',
-		flashcard_audio: '🎤',
-		audiocard_review: '🎧',
-		mcq_review: '☑️',
-		conversation: '💬',
-		writing_chat: '✍️',
-		reading_chat: '📖',
-		tutor_chat: '🧑‍🏫'
-	};
 
 	const primaryFlow = $derived(activity.supported_flows?.[0]);
 
@@ -57,16 +46,6 @@
 >
 	<div class="title-row">
 		<div class="title">{activity.name}</div>
-		{#if plotId && primaryFlow}
-			<button
-				type="button"
-				class="quick-jump"
-				title={`Start ${primaryFlow.replace(/_/g, ' ')}`}
-				onclick={handleQuickJump}
-			>
-				{FLOW_ICONS[primaryFlow] ?? '▶'}
-			</button>
-		{/if}
 	</div>
 	<div class="meta">
 		<span class="badge">{formatType(activity.type)}</span>
@@ -77,15 +56,26 @@
 			<span>New: {(activity as any).stats?.new_cards ?? 0}</span>
 		</div>
 	{/if}
+	{#if plotId && primaryFlow}
+		<button
+			type="button"
+			class="quick-jump"
+			title={`Start ${primaryFlow.replace(/_/g, ' ')}`}
+			onclick={handleQuickJump}
+		>
+			&rsaquo;
+		</button>
+	{/if}
 </div>
 
 <style>
 	.activity-tile {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
 		gap: 0.35rem;
-		padding: 0.6rem 0.7rem;
+		padding: 0.6rem 2.65rem 0.6rem 0.7rem;
 		border-radius: var(--radius);
 		border: 1px solid var(--color-border);
 		min-height: 90px;
@@ -104,7 +94,6 @@
 	.title-row {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
 		gap: 0.4rem;
 	}
 
@@ -116,22 +105,30 @@
 	}
 
 	.quick-jump {
-		background: rgba(255, 255, 255, 0.85);
-		border: 1px solid var(--color-border);
-		border-radius: 999px;
-		width: 1.6rem;
-		height: 1.6rem;
-		display: inline-flex;
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		width: 2rem;
+		background: rgba(255, 255, 255, 0.45);
+		border: none;
+		border-left: 1px solid var(--color-border);
+		border-radius: 0 var(--radius) var(--radius) 0;
+		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 0.85rem;
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: rgba(0, 0, 0, 0.7);
 		cursor: pointer;
 		padding: 0;
 		line-height: 1;
+		transition: background 0.15s ease, color 0.15s ease;
 	}
 
 	.quick-jump:hover {
-		background: white;
+		background: rgba(255, 255, 255, 0.9);
+		color: rgba(0, 0, 0, 0.9);
 	}
 
 	.meta {
