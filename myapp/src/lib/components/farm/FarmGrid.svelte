@@ -204,7 +204,7 @@
 										<ActivityTile
 											{activity}
 											{plotId}
-											ripeness={(activity as any)?.stats?.ripeness ?? 0}
+											ripeness={(activity as any)?.ripeness ?? 0}
 											onclick={() => onactivityclick?.(activity)}
 										/>
 									</div>
