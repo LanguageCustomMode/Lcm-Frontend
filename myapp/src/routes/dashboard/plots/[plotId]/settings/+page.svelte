@@ -43,7 +43,10 @@
 
 			// Refresh parent layout data so sidebar/dashboard plot lists reflect updates immediately.
 			await Promise.all([
+				invalidate('app:dashboard-plots'),
 				invalidate('/api/plots'),
+				invalidate('/api/plots?include_archived=true'),
+				invalidate('/api/plots?archived=true'),
 				invalidate(`/api/plots/${data.plot.id}`)
 			]);
 
