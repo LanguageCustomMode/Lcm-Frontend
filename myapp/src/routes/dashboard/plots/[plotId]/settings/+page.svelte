@@ -12,8 +12,6 @@
 	let description = $state(data.plot?.description ?? '');
 	let l2Target = $state(data.plot?.l2_target ?? '');
 	let proficiency = $state(data.plot?.proficiency ?? 'A1');
-	let gridRows = $state(data.plot?.grid_rows ?? 3);
-	let gridCols = $state(data.plot?.grid_cols ?? 4);
 	let archived = $state(data.plot?.archived ?? false);
 
 	let saving = $state(false);
@@ -34,8 +32,6 @@
 					description,
 					l2_target: l2Target,
 					proficiency,
-					grid_rows: Number(gridRows),
-					grid_cols: Number(gridCols),
 					archived
 				})
 			});
@@ -83,10 +79,6 @@
 			<option value="C1">C1 – Advanced</option>
 			<option value="C2">C2 – Mastery</option>
 		</Select>
-		<div class="grid-row">
-			<Input label="Grid rows" type="number" min={1} max={10} bind:value={gridRows} />
-			<Input label="Grid cols" type="number" min={1} max={10} bind:value={gridCols} />
-		</div>
 		<Checkbox label="Archive this plot" bind:checked={archived} />
 		<Button type="button" disabled={saving} onclick={save}>
 			{saving ? 'Saving...' : 'Save Settings'}
@@ -129,13 +121,7 @@
 		max-width: 560px;
 	}
 
-	.grid-row {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-		gap: 0.75rem;
-	}
-
-.success {
+	.success {
 		color: #0f766e;
 	}
 

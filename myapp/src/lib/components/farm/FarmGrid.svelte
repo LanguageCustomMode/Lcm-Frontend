@@ -8,12 +8,14 @@
 		cols: number;
 		activities: Activity[];
 		plotId?: string;
+		userLevel?: number;
+		maxActivitySlots?: number;
 		onactivityclick?: (activity: Activity) => void;
 		oncellclick?: (row: number, col: number) => void;
 		onactivitymoved?: () => void;
 	}
 
-	let { rows, cols, activities, plotId, onactivityclick, oncellclick, onactivitymoved }: Props = $props();
+	let { rows, cols, activities, plotId, userLevel = 1, maxActivitySlots, onactivityclick, oncellclick, onactivitymoved }: Props = $props();
 
 	const key = (row: number, col: number) => `${row},${col}`;
 
@@ -39,6 +41,12 @@
 		return map;
 	});
 
+	// Determine what level unlocks a given activity slot (1-indexed)
+	const getActivityUnlockLevel = (slotNumber: number): number => {
+		if (slotNumber <= 6) return 1;
+		return 5 * Math.ceil((slotNumber - 6) / 5);
+	};
+
 	const safeRows = $derived(() => {
 		const value = Number(rows ?? 0);
 		return Number.isFinite(value) ? Math.max(0, value) : 0;
@@ -47,6 +55,15 @@
 		const value = Number(cols ?? 0);
 		return Number.isFinite(value) ? Math.max(0, value) : 0;
 	});
+
+	// Check if a cell is a locked activity slot
+	const isCellLocked = (row: number, col: number): boolean => {
+		if (!maxActivitySlots) return false;
+		const cellIndex = row * safeCols() + col;
+		if (cellIndex >= maxActivitySlots) return true;
+		const unlockLevel = getActivityUnlockLevel(cellIndex + 1);
+		return unlockLevel > userLevel;
+	};
 
 	const rowsArray = $derived(() => Array.from({ length: safeRows() }, (_, index) => index));
 	const colsArray = $derived(() => Array.from({ length: safeCols() }, (_, index) => index));
@@ -184,12 +201,16 @@
 						{@const isAnchor = activity && anchorByActivity().get(activity.id) === cellKey}
 						{@const isDragging = dragActivity && (dragActivity.grid_positions ?? []).some(([dr, dc]) => dr === r && dc === c)}
 						{@const isProjected = projectedCells().has(cellKey)}
+						{@const isLocked = isCellLocked(r, c)}
+						{@const cellIndex = r * safeCols() + c}
+						{@const unlockLevel = getActivityUnlockLevel(cellIndex + 1)}
 						<div
 							class="cell"
 							class:drag-over={isProjected && isValidDrop()}
 							class:drag-invalid={isProjected && !isValidDrop()}
 							class:is-dragging={isDragging}
-							on:click={() => handleCellClick(r, c)}
+							class:is-locked={isLocked}
+							on:click={() => !isLocked && handleCellClick(r, c)}
 							on:dragover={(e) => handleDragOver(r, c, e)}
 							on:drop={(e) => handleDrop(r, c, e)}
 						>
@@ -211,6 +232,11 @@
 								{:else}
 									<div class="merged"></div>
 								{/if}
+							{:else if isLocked}
+								<div class="locked-cell">
+									<div class="lock-icon">🔒</div>
+									<div class="unlock-level">Level {unlockLevel}</div>
+								</div>
 							{:else}
 								<div class="empty-cell">+</div>
 							{/if}
@@ -299,5 +325,38 @@
 
 	.empty {
 		color: #666;
+	}
+
+	.locked-cell {
+		width: 100%;
+		height: 100%;
+		border: 2px solid #d3d3ce;
+		border-radius: var(--radius);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.4rem;
+		background: #fafaf7;
+		cursor: not-allowed;
+	}
+
+	.lock-icon {
+		font-size: 1.8rem;
+		opacity: 0.5;
+	}
+
+	.unlock-level {
+		font-size: 0.75rem;
+		color: #888;
+		font-weight: 500;
+	}
+
+	.cell.is-locked {
+		cursor: not-allowed;
+	}
+
+	.cell.is-locked:hover {
+		background: transparent;
 	}
 </style>
