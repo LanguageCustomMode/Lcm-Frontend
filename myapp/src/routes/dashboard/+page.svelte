@@ -1,7 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import type { Plot } from '$lib/types';
+	import type { PageData } from './$types';
 
-	let { data } = $props();
+	type DashboardPlot = Omit<Plot, 'archived'> & {
+		archived?: boolean | string | number;
+		is_archived?: boolean | string | number;
+	};
+
+	let { data }: { data: PageData } = $props();
 
 	interface Insight {
 		type: string;
@@ -40,7 +47,7 @@
 		return g.xp_to_next_level ?? (g.level + 1) * 100;
 	});
 
-	const isArchivedPlot = (plot: Record<string, unknown>) => {
+	const isArchivedPlot = (plot: DashboardPlot) => {
 		const archived = plot.archived;
 		const isArchived = plot.is_archived;
 		if (typeof archived === 'boolean') return archived;
@@ -52,8 +59,8 @@
 		return false;
 	};
 
-	const activePlots = $derived(() => (data.plots ?? []).filter((plot) => !isArchivedPlot(plot)));
-	const archivedPlots = $derived(() => (data.plots ?? []).filter((plot) => isArchivedPlot(plot)));
+	const activePlots = $derived(() => ((data.plots ?? []) as DashboardPlot[]).filter((plot) => !isArchivedPlot(plot)));
+	const archivedPlots = $derived(() => ((data.plots ?? []) as DashboardPlot[]).filter((plot) => isArchivedPlot(plot)));
 
 	onMount(loadInsights);
 </script>

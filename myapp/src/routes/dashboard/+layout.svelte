@@ -2,8 +2,9 @@
 	import type { Snippet } from 'svelte';
 	import { createClient } from '$lib/supabase';
 	import { goto } from '$app/navigation';
+ 	import type { LayoutData } from './$types';
 
-	let { children, data } = $props();
+	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 	let signingOut = $state(false);
 
 	const logout = async () => {

@@ -1,5 +1,11 @@
 import { redirect } from '@sveltejs/kit';
+import type { Plot } from '$lib/types';
 import type { LayoutServerLoad } from './$types';
+
+type DashboardPlot = Omit<Plot, 'archived'> & {
+	archived?: boolean | string | number;
+	is_archived?: boolean | string | number;
+};
 
 export const load: LayoutServerLoad = async ({ locals, fetch, depends }) => {
 	const { session } = await locals.safeGetSession();
@@ -8,9 +14,9 @@ export const load: LayoutServerLoad = async ({ locals, fetch, depends }) => {
 	// Custom dependency key lets us invalidate dashboard plot data in one place.
 	depends('app:dashboard-plots');
 
-	const fetchJson = async (url: string) => {
+	const fetchJson = async <T,>(url: string): Promise<T | null> => {
 		const res = await fetch(url);
-		return res.ok ? await res.json() : null;
+		return res.ok ? ((await res.json()) as T) : null;
 	};
 
 	const [profileRes, plotsRes, gamificationRes] = await Promise.all([
@@ -20,16 +26,16 @@ export const load: LayoutServerLoad = async ({ locals, fetch, depends }) => {
 	]);
 
 	const profile = profileRes.ok ? await profileRes.json() : null;
-	const basePlots = plotsRes.ok ? await plotsRes.json() : [];
+	const basePlots = plotsRes.ok ? ((await plotsRes.json()) as DashboardPlot[]) : [];
 
 	// Some backend builds only return active plots by default; try common
 	// query variants to include archived and merge by id.
 	const [plotsIncludeArchived, plotsArchivedOnly] = await Promise.all([
-		fetchJson('/api/plots?include_archived=true'),
-		fetchJson('/api/plots?archived=true')
+		fetchJson<DashboardPlot[]>('/api/plots?include_archived=true'),
+		fetchJson<DashboardPlot[]>('/api/plots?archived=true')
 	]);
 
-	const mergedMap = new Map<string, unknown>();
+	const mergedMap = new Map<string, DashboardPlot>();
 	for (const list of [basePlots, plotsIncludeArchived ?? [], plotsArchivedOnly ?? []]) {
 		if (!Array.isArray(list)) continue;
 		for (const plot of list) {

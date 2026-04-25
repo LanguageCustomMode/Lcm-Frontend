@@ -31,20 +31,22 @@
 	let wishlist = $state<WishlistItem[]>([]);
 	let references = $state<RagSource[]>([]);
 	let title = $state('');
-	let type: ActivityType = $state('vocabulary');
+	let type = $state<ActivityType>('vocabulary');
 	let ragSourceId = $state<string>('');
 	let wishlistItemId = $state<string | null>(null);
 	let saving = $state(false);
 	let error = $state<string | null>(null);
 
-	const needsRag = $derived(
-		type === 'reading' ||
-			type === 'fundamentals' ||
-			type === 'grammar_theory' ||
-			type === 'grammar_processing' ||
-			type === 'grammar_manipulations' ||
-			type === 'cultural_knowledge'
-	);
+	const ragActivityTypes: ActivityType[] = [
+		'reading',
+		'fundamentals',
+		'grammar_theory',
+		'grammar_processing',
+		'grammar_manipulations',
+		'cultural_knowledge'
+	];
+
+	const needsRag = $derived(ragActivityTypes.includes(type));
 
 	const load = async () => {
 		const [w, r] = await Promise.all([
