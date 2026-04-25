@@ -55,7 +55,11 @@
 	};
 </script>
 
-<h1>Plot Settings</h1>
+<div class="plot-header">
+	<div>
+		<h1>Plot Settings</h1>
+	</div>
+</div>
 {#if data.plot}
 	<div class="settings-form">
 		<Input label="Name" bind:value={name} />
@@ -91,6 +95,22 @@
 {/if}
 
 <style>
+	.plot-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1rem;
+		margin-bottom: 0.5rem;
+	}
+	.plot-header h1 {
+		font-family: 'Nunito', 'Trebuchet MS', 'Segoe UI', sans-serif;
+		font-weight: 700;
+	}
+	.plot-desc {
+		font-size: 0.8rem;
+		color: #666;
+		margin-top: 0.25rem;
+	}
 	.settings-form {
 		background: white;
 		border: 1px solid var(--color-border);

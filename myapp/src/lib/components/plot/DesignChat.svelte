@@ -2,7 +2,7 @@
 	import ChatWindow from '$lib/components/chat/ChatWindow.svelte';
 	import { fetchSSE } from '$lib/utils/sse';
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 
 	interface Props {
 		plotId: string;
@@ -114,6 +114,7 @@
 			});
 			if (!res.ok) throw new Error(await res.text());
 			const payload = await res.json();
+			await invalidate(`app:plot:${plotId}`);
 			await goto(`/dashboard/plots/${plotId}/activities/${payload.activity_id}`);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to accept';

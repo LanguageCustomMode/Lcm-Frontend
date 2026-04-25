@@ -13,6 +13,7 @@
 		audiocard_review: 'Listening',
 		mcq_review: 'MCQ',
 		conversation: 'Practice',
+		dialogue_chat: 'Dialogue',
 		writing_chat: 'Writing',
 		reading_chat: 'Reading',
 		tutor_chat: 'Tutor'
@@ -26,6 +27,9 @@
 	let error = $state<string | null>(null);
 	let activeTab = $state<'overview' | 'modify'>('overview');
 	let worksheetState = $state<WorksheetInitialState | null>(null);
+	let generating = $state(false);
+	let browserRefreshKey = $state(0);
+	let pollStartedFor = $state<string | null>(null);
 
 	interface WorksheetInitialState {
 		session_id: string;
@@ -77,20 +81,64 @@
 		await goto('/dashboard');
 	};
 
+	const fetchContentCount = async (id: string): Promise<number> => {
+		const res = await fetch(`/api/activities/${id}/content?limit=200`);
+		if (!res.ok) return -1;
+		const items = await res.json();
+		return Array.isArray(items) ? items.length : -1;
+	};
+
+	const refreshStats = async (id: string) => {
+		const res = await fetch(`/api/activities/${id}/stats`);
+		if (res.ok) stats = await res.json();
+	};
+
+	const pollForGeneratedContent = async (id: string) => {
+		const baseline = await fetchContentCount(id);
+		generating = true;
+		const start = Date.now();
+		const maxMs = 120_000;
+		const intervalMs = 3_000;
+		let lastCount = baseline;
+		let stableHits = 0;
+		while (Date.now() - start < maxMs) {
+			await new Promise((r) => setTimeout(r, intervalMs));
+			const count = await fetchContentCount(id);
+			if (count > baseline && count === lastCount) {
+				stableHits += 1;
+				if (stableHits >= 2) break;
+			} else if (count > baseline) {
+				stableHits = 1;
+			} else {
+				stableHits = 0;
+			}
+			lastCount = count;
+		}
+		await refreshStats(id);
+		browserRefreshKey += 1;
+		generating = false;
+	};
+
+	$effect(() => {
+		if (worksheetComplete && activity && pollStartedFor !== activity.id) {
+			pollStartedFor = activity.id;
+			pollForGeneratedContent(activity.id);
+		}
+	});
+
 	onMount(loadActivity);
 </script>
 
-<h1>Activity Detail</h1>
 {#if error}
 	<p class="error">{error}</p>
 {/if}
 {#if loading}
 	<p>Loading activity...</p>
 {:else if activity}
-	<div class="activity-summary">
+	<div class="plot-header">
 		<div>
-			<h2>{activity.name}</h2>
-			<p class="meta">{activity.type.replace(/_/g, ' ')}</p>
+			<h1>{activity.name}</h1>
+			<p class="plot-desc">{activity.type.replace(/_/g, ' ')}</p>
 		</div>
 		<div class="actions">
 			{#each activity.supported_flows ?? [] as flow}
@@ -146,8 +194,13 @@
 			<Worksheet activityId={activity.id} initialState={worksheetState} />
 		{/if}
 		<details class="browser-details" open={generatedContentOpen}>
-			<summary>Generated content</summary>
-			<ActivityBrowser activityId={activity.id} />
+			<summary>
+				Generated content
+				{#if generating}<span class="generating">· generating…</span>{/if}
+			</summary>
+			{#key browserRefreshKey}
+				<ActivityBrowser activityId={activity.id} />
+			{/key}
 		</details>
 		{#if hasWorksheet && worksheetComplete}
 			<details class="browser-details">
@@ -163,17 +216,21 @@
 {/if}
 
 <style>
-	.activity-summary {
+	.plot-header {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
+		align-items: flex-start;
 		gap: 1rem;
 		margin-bottom: 1rem;
 	}
-
-	.meta {
+	.plot-header h1 {
+		font-family: 'Nunito', 'Trebuchet MS', 'Segoe UI', sans-serif;
+		font-weight: 700;
+	}
+	.plot-desc {
 		font-size: 0.8rem;
 		color: #666;
+		margin-top: 0.25rem;
 	}
 
 	.actions {
@@ -246,5 +303,10 @@
 		font-size: 0.8rem;
 		color: #555;
 		padding: 0.3rem 0;
+	}
+	.generating {
+		margin-left: 0.4rem;
+		color: #4a7c59;
+		font-style: italic;
 	}
 </style>

@@ -5,14 +5,32 @@
 	import AudiocardReviewFlow from '$lib/components/flows/AudiocardReviewFlow.svelte';
 	import McqReviewFlow from '$lib/components/flows/McqReviewFlow.svelte';
 	import ConversationFlow from '$lib/components/flows/ConversationFlow.svelte';
+	import DialogueChatFlow from '$lib/components/flows/DialogueChatFlow.svelte';
 	import WritingChatFlow from '$lib/components/flows/WritingChatFlow.svelte';
 	import ReadingChatFlow from '$lib/components/flows/ReadingChatFlow.svelte';
+	import type { FlowType } from '$lib/types';
+
+	const FLOW_LABELS: Record<FlowType, string> = {
+		flashcard_review: 'Review',
+		flashcard_audio: 'Pronunciation',
+		audiocard_review: 'Listening',
+		mcq_review: 'MCQ',
+		conversation: 'Practice',
+		dialogue_chat: 'Dialogue',
+		writing_chat: 'Writing',
+		reading_chat: 'Reading',
+		tutor_chat: 'Tutor'
+	};
 
 	let { data } = $props();
 	const { activity, flowType } = data;
 </script>
 
-<div class="flow-actions">
+<div class="plot-header">
+	<div>
+		<h1>{activity.name}</h1>
+		<p class="plot-desc">{FLOW_LABELS[flowType] ?? flowType}</p>
+	</div>
 	<a class="exit-review" href="/dashboard/plots/{$page.params.plotId}/activities/{$page.params.activityId}">Exit</a>
 </div>
 
@@ -26,6 +44,8 @@
 	<McqReviewFlow {activity} />
 {:else if flowType === 'conversation' || flowType === 'tutor_chat'}
 	<ConversationFlow {activity} />
+{:else if flowType === 'dialogue_chat'}
+	<DialogueChatFlow {activity} />
 {:else if flowType === 'writing_chat'}
 	<WritingChatFlow {activity} />
 {:else if flowType === 'reading_chat'}
@@ -35,10 +55,21 @@
 {/if}
 
 <style>
-	.flow-actions {
+	.plot-header {
 		display: flex;
-		justify-content: flex-end;
-		margin-bottom: 0.75rem;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+	.plot-header h1 {
+		font-family: 'Nunito', 'Trebuchet MS', 'Segoe UI', sans-serif;
+		font-weight: 700;
+	}
+	.plot-desc {
+		font-size: 0.8rem;
+		color: #666;
+		margin-top: 0.25rem;
 	}
 
 	.exit-review {

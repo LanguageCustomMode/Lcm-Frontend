@@ -8,6 +8,7 @@ const VALID_FLOWS: FlowType[] = [
 	'audiocard_review',
 	'mcq_review',
 	'conversation',
+	'dialogue_chat',
 	'writing_chat',
 	'reading_chat',
 	'tutor_chat'

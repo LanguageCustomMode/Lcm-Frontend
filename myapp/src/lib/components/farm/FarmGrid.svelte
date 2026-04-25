@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Activity } from '$lib/types';
 	import ActivityTile from '$lib/components/farm/ActivityTile.svelte';
+	import { invalidate } from '$app/navigation';
 
 	interface Props {
 		rows: number;
@@ -171,6 +172,7 @@
 			body: JSON.stringify({ grid_positions: newPositions })
 		});
 
+		if (plotId) await invalidate(`app:plot:${plotId}`);
 		onactivitymoved?.();
 	}
 
@@ -223,7 +225,7 @@
 										<ActivityTile
 											{activity}
 											{plotId}
-											ripeness={(activity as any)?.stats?.ripeness ?? 0}
+											ripeness={(activity as any)?.ripeness ?? 0}
 											onclick={() => onactivityclick?.(activity)}
 										/>
 									</div>

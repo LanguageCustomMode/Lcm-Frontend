@@ -22,6 +22,7 @@
 	const formatType = (value?: string) => (value ? value.replace(/_/g, ' ') : '');
 	const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 	const backgroundForRipeness = (value: number) => {
+		console.log("Calculating background for ripeness:", value);
 		const clamped = clamp(value, 0, 1);
 		const hue = 110 - clamped * 60;
 		const sat = 45 + clamped * 15;
@@ -46,14 +47,12 @@
 >
 	<div class="title-row">
 		<div class="title">{activity.name}</div>
-	</div>
-	<div class="meta">
 		<span class="badge">{formatType(activity.type)}</span>
 	</div>
-	{#if (activity as any).stats}
+	{#if (activity as any).due_cards !== undefined || (activity as any).new_cards !== undefined}
 		<div class="stats">
-			<span>Due: {(activity as any).stats?.due_cards ?? 0}</span>
-			<span>New: {(activity as any).stats?.new_cards ?? 0}</span>
+			<span>Due: {(activity as any).due_cards ?? 0}</span>
+			<span>New: {(activity as any).new_cards ?? 0}</span>
 		</div>
 	{/if}
 	{#if plotId && primaryFlow}

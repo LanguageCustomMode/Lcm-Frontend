@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { ActivityType } from '$lib/types';
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 
 	interface WishlistItem {
 		id: string;
@@ -71,6 +71,7 @@
 		await fetch(`/api/plots/${plotId}/wishlist/${item.id}`, { method: 'DELETE' });
 		wishlist = wishlist.filter((w) => w.id !== item.id);
 		if (wishlistItemId === item.id) wishlistItemId = null;
+		await invalidate(`app:plot:${plotId}`);
 	};
 
 	const submit = async () => {
@@ -99,6 +100,7 @@
 			});
 			if (!res.ok) throw new Error(await res.text());
 			const payload = await res.json();
+			await invalidate(`app:plot:${plotId}`);
 			oncreated?.(payload.id);
 			await goto(`/dashboard/plots/${plotId}/activities/${payload.id}`);
 		} catch (err) {

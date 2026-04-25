@@ -2,6 +2,8 @@
 	import type { ContentItem } from '$lib/types';
 	import CardEditor from '$lib/components/activity/CardEditor.svelte';
 	import { renderMarkdown } from '$lib/utils/markdown';
+	import { page as appPage } from '$app/stores';
+	import { invalidate } from '$app/navigation';
 
 	interface Props {
 		items?: ContentItem[];
@@ -104,6 +106,8 @@
 			});
 			if (!res.ok) throw new Error(await res.text());
 			await loadItems();
+			const plotId = $appPage.params.plotId;
+			if (plotId) await invalidate(`app:plot:${plotId}`);
 			creating = false;
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save';
@@ -131,6 +135,8 @@
 			const res = await fetch(`/api/content/${item.id}`, { method: 'DELETE' });
 			if (!res.ok) throw new Error(await res.text());
 			await loadItems();
+			const plotId = $appPage.params.plotId;
+			if (plotId) await invalidate(`app:plot:${plotId}`);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to delete';
 		}

@@ -101,6 +101,20 @@
 		align-items: center;
 	}
 
+	.header h2 {
+		font-size: 0.85rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #4a7c59;
+		margin: 0;
+	}
+
+	.header p {
+		font-size: 0.8rem;
+		color: #666;
+		margin: 0.25rem 0 0;
+	}
+
 	.actions {
 		display: flex;
 		gap: 0.5rem;

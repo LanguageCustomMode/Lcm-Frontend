@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import type { Activity } from '$lib/types';
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 
 	let { data } = $props();
 
@@ -43,6 +43,7 @@
 			});
 			if (!res.ok) throw new Error(await res.text());
 			await loadActivity();
+			if ($page.params.plotId) await invalidate(`app:plot:${$page.params.plotId}`);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save activity';
 		}
@@ -54,6 +55,7 @@
 		try {
 			const res = await fetch(`/api/activities/${activity.id}`, { method: 'DELETE' });
 			if (!res.ok) throw new Error(await res.text());
+			if (data.plot?.id) await invalidate(`app:plot:${data.plot.id}`);
 			await goto(`/dashboard/plots/${data.plot?.id}`);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to delete activity';
@@ -99,6 +101,7 @@
 					}
 				}
 			}
+			if ($page.params.plotId) await invalidate(`app:plot:${$page.params.plotId}`);
 		} catch (err) {
 			generateError = err instanceof Error ? err.message : 'Generation failed';
 		} finally {
@@ -168,8 +171,14 @@
 	.page-header {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
-		gap: 0.75rem;
+		align-items: flex-start;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.page-header h1 {
+		font-family: 'Nunito', 'Trebuchet MS', 'Segoe UI', sans-serif;
+		font-weight: 700;
 	}
 
 	.exit {
@@ -198,8 +207,11 @@
 	}
 
 	.generate-panel h3 {
-		font-size: 0.9rem;
-		font-weight: 600;
+		font-size: 0.85rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #4a7c59;
+		margin: 0;
 	}
 
 	.generate-row {

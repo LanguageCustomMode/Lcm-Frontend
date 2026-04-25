@@ -43,7 +43,6 @@
 	});
 </script>
 
-<h1>Reading</h1>
 {#if chat.error}
 	<p class="error">{chat.error}</p>
 {/if}
