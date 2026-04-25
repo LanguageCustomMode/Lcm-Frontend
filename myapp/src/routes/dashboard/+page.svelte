@@ -1,7 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import type { Plot } from '$lib/types';
+	import type { PageData } from './$types';
 
-	let { data } = $props();
+	type DashboardPlot = Omit<Plot, 'archived'> & {
+		archived?: boolean | string | number;
+		is_archived?: boolean | string | number;
+	};
+
+	let { data }: { data: PageData } = $props();
 
 	interface Insight {
 		type: string;
@@ -39,6 +46,21 @@
 		if (!g) return 0;
 		return g.xp_to_next_level ?? (g.level + 1) * 100;
 	});
+
+	const isArchivedPlot = (plot: DashboardPlot) => {
+		const archived = plot.archived;
+		const isArchived = plot.is_archived;
+		if (typeof archived === 'boolean') return archived;
+		if (typeof archived === 'string') return archived.toLowerCase() === 'true';
+		if (typeof archived === 'number') return archived === 1;
+		if (typeof isArchived === 'boolean') return isArchived;
+		if (typeof isArchived === 'string') return isArchived.toLowerCase() === 'true';
+		if (typeof isArchived === 'number') return isArchived === 1;
+		return false;
+	};
+
+	const activePlots = $derived(() => ((data.plots ?? []) as DashboardPlot[]).filter((plot) => !isArchivedPlot(plot)));
+	const archivedPlots = $derived(() => ((data.plots ?? []) as DashboardPlot[]).filter((plot) => isArchivedPlot(plot)));
 
 	onMount(loadInsights);
 </script>
@@ -89,14 +111,14 @@
 
 	<!-- Plots grid -->
 	<h2>Your Plots</h2>
-	{#if data.plots.length === 0}
+	{#if activePlots().length === 0}
 		<div class="empty-state">
 			<p>You don't have any plots yet. Create one to get started.</p>
 			<a href="/dashboard/plots/new" class="btn-primary">Create Your First Plot</a>
 		</div>
 	{:else}
 		<div class="plot-grid">
-			{#each data.plots as plot}
+			{#each activePlots() as plot}
 				<a href="/dashboard/plots/{plot.id}" class="plot-card">
 					<div class="plot-card-inner">
 						<h3>{plot.name}</h3>
@@ -108,6 +130,25 @@
 			<a href="/dashboard/plots/new" class="plot-card new-plot">
 				<span>+ New Plot</span>
 			</a>
+		</div>
+	{/if}
+
+	<h2>Your Archived Plots</h2>
+	{#if archivedPlots().length === 0}
+		<div class="empty-state">
+			<p>You don't have any archived plots yet.</p>
+		</div>
+	{:else}
+		<div class="plot-grid">
+			{#each archivedPlots() as plot}
+				<a href="/dashboard/plots/{plot.id}" class="plot-card">
+					<div class="plot-card-inner">
+						<h3>{plot.name}</h3>
+						<p class="plot-meta">{plot.l2_target}{plot.proficiency ? ' · ' + plot.proficiency : ''}</p>
+						<span class="plot-count">{plot.activity_count ?? 0} activities</span>
+					</div>
+				</a>
+			{/each}
 		</div>
 	{/if}
 </div>

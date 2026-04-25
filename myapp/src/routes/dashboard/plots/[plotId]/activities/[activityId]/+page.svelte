@@ -69,6 +69,14 @@
 		}
 	};
 
+	const exitActivity = async () => {
+		if (data.plot?.id) {
+			await goto(`/dashboard/plots/${data.plot.id}`);
+			return;
+		}
+		await goto('/dashboard');
+	};
+
 	onMount(loadActivity);
 </script>
 
@@ -96,6 +104,7 @@
 			<button type="button" onclick={() => goto(`/dashboard/plots/${data.plot?.id}/activities/${activity!.id}/edit`)}>
 				Edit
 			</button>
+			<button type="button" onclick={exitActivity}>Return to Plot</button>
 		</div>
 	</div>
 	{#if stats}

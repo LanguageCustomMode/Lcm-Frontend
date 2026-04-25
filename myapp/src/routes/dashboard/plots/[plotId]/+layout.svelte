@@ -16,33 +16,15 @@
 			Grid
 		</a>
 		<a
-			href="/dashboard/plots/{data.plot?.id}/composition"
-			class:active={isActive(`/dashboard/plots/${data.plot?.id}/composition`)}
-		>
-			Composition
-		</a>
-		<a
-			href="/dashboard/plots/{data.plot?.id}/references"
-			class:active={isActive(`/dashboard/plots/${data.plot?.id}/references`)}
-		>
-			References
-		</a>
-		<a
-			href="/dashboard/plots/{data.plot?.id}/design"
-			class:active={isActive(`/dashboard/plots/${data.plot?.id}/design`)}
-		>
-			Design
-		</a>
-		<a
 			href="/dashboard/plots/{data.plot?.id}/settings"
 			class:active={isActive(`/dashboard/plots/${data.plot?.id}/settings`)}
 		>
 			Settings
 		</a>
+		<a href="/dashboard">Exit Plot</a>
 	</div>
 	<div class="plot-actions">
 		<span>{data.plot?.activities?.length ?? data.plot?.activity_count ?? 0} activities</span>
-		<a href="/dashboard/plots/{data.plot?.id}/design" class="primary">Create Activity</a>
 	</div>
 </nav>
 
@@ -63,6 +45,8 @@
 
 	.plot-info h2 {
 		margin-bottom: 0.25rem;
+		font-family: 'Nunito', 'Trebuchet MS', 'Segoe UI', sans-serif;
+		font-weight: 700;
 	}
 
 	.plot-info span {
@@ -78,17 +62,25 @@
 
 	.plot-links a {
 		text-decoration: none;
-		color: inherit;
+		color: #fff;
 		padding: 0.3rem 0.6rem;
 		border-radius: 999px;
-		border: 1px solid transparent;
+		border: 1px solid #2f6a3f;
 		font-size: 0.8rem;
+		font-weight: 600;
+		transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 	}
 
-	.plot-links a.active,
-	.plot-links a:hover {
-		border-color: var(--color-primary);
-		color: var(--color-primary);
+	.plot-links a {
+		background: #3f8a52;
+		border-color: #2f6a3f;
+		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+	}
+
+	.plot-links a:hover,
+	.plot-links a.active {
+		background: #347444;
+		border-color: #275a35;
 	}
 
 	.plot-actions {
@@ -96,14 +88,6 @@
 		gap: 0.75rem;
 		align-items: center;
 		font-size: 0.8rem;
-	}
-
-	.plot-actions .primary {
-		background: var(--color-primary);
-		color: white;
-		text-decoration: none;
-		padding: 0.4rem 0.8rem;
-		border-radius: 999px;
 	}
 
 	@media (max-width: 900px) {
