@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { invalidate } from '$app/navigation';
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
 	import Select from '$lib/components/ui/Select.svelte';
@@ -39,6 +40,13 @@
 				})
 			});
 			if (!res.ok) throw new Error(await res.text());
+
+			// Refresh parent layout data so sidebar/dashboard plot lists reflect updates immediately.
+			await Promise.all([
+				invalidate('/api/plots'),
+				invalidate(`/api/plots/${data.plot.id}`)
+			]);
+
 			message = 'Plot updated.';
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to update plot';
