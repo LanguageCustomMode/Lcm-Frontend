@@ -43,13 +43,15 @@
 				<span>Plots</span>
 				<a href="/dashboard/plots/new">+ New</a>
 			</div>
-			{#if data.plots?.length}
-				{#each data.plots as plot}
-					<a href="/dashboard/plots/{plot.id}" class="plot-link">{plot.name}</a>
-				{/each}
-			{:else}
-				<p class="meta">No plots yet.</p>
-			{/if}
+			<div class="plot-list">
+				{#if data.plots?.length}
+					{#each data.plots as plot}
+						<a href="/dashboard/plots/{plot.id}" class="plot-link">{plot.name}</a>
+					{/each}
+				{:else}
+					<p class="meta">No plots yet.</p>
+				{/if}
+			</div>
 		</div>
 		<button type="button" class="logout" on:click={logout} disabled={signingOut}>
 			{signingOut ? 'Signing out...' : 'Log out'}
@@ -143,7 +145,21 @@
 
 	.plots {
 		display: grid;
-		gap: 0.5rem;
+		gap: 0.25rem;
+	}
+
+	.plot-list {
+		display: flex;
+		flex-wrap: wrap;
+		align-content: flex-start;
+		gap: 0.65rem 0.85rem;
+		max-height: 24rem;
+		min-height: 10rem;
+		overflow-y: auto;
+		padding: 0.35rem 0.6rem 0.6rem;
+		padding-right: 0.3rem;
+		border-radius: 0.85rem;
+		background: transparent;
 	}
 
 	.plot-header {
@@ -156,21 +172,49 @@
 	}
 
 	.plot-link {
+		display: inline-block;
+		width: fit-content;
 		text-decoration: none;
-		color: inherit;
-		padding: 0.35rem 0.5rem;
-		border-radius: var(--radius);
-		background: white;
-		border: 1px solid var(--color-border);
-		font-size: 0.85rem;
+		color: #2f5f3f;
+		padding: 0.58rem 1.05rem;
+		border-radius: 999px;
+		background: #e7f4eb;
+		border: 1px solid #b8d8c2;
+		font-size: 1.08rem;
+		line-height: 1.2;
+		transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+	}
+
+	.plot-link:hover {
+		background: #d9eddf;
+		border-color: #9fc8ab;
+		transform: translateY(-1px);
+	}
+
+	.plot-link:nth-child(3n + 1) {
+		margin-top: 0;
+	}
+
+	.plot-link:nth-child(3n + 2) {
+		margin-top: 0.12rem;
+	}
+
+	.plot-link:nth-child(3n) {
+		margin-top: 0.06rem;
 	}
 
 	.logout {
-		border: 1px solid var(--color-border);
-		background: white;
+		border: 1px solid #2f5f3f;
+		background: #2f5f3f;
+		color: #fff;
 		border-radius: var(--radius);
 		padding: 0.5rem;
 		cursor: pointer;
+	}
+
+	.logout:hover:not(:disabled) {
+		background: #244c33;
+		border-color: #244c33;
 	}
 
 	.dashboard-content {

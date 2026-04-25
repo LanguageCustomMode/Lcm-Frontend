@@ -63,6 +63,8 @@
 
 	.plot-info h2 {
 		margin-bottom: 0.25rem;
+		font-family: 'Nunito', 'Trebuchet MS', 'Segoe UI', sans-serif;
+		font-weight: 700;
 	}
 
 	.plot-info span {

@@ -106,6 +106,10 @@
 		gap: 1rem;
 		margin-bottom: 0.5rem;
 	}
+	.plot-header h1 {
+		font-family: 'Nunito', 'Trebuchet MS', 'Segoe UI', sans-serif;
+		font-weight: 700;
+	}
 	.plot-desc {
 		font-size: 0.8rem;
 		color: #666;
