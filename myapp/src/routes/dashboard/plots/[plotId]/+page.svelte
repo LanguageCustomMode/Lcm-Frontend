@@ -50,13 +50,6 @@
 			<p class="plot-desc">{data.plot.description}</p>
 		{/if}
 	</div>
-	{#if data.plot}
-		<nav class="plot-nav">
-			<a href="/dashboard/plots/{data.plot.id}/composition">Stats</a>
-			<a href="/dashboard/plots/{data.plot.id}/references">References</a>
-			<a href="/dashboard/plots/{data.plot.id}/settings">Settings</a>
-		</nav>
-	{/if}
 </div>
 
 {#key data.plot?.id}
@@ -114,25 +107,6 @@
 		font-size: 0.8rem;
 		color: #666;
 		margin-top: 0.25rem;
-	}
-	.plot-nav {
-		display: flex;
-		gap: 0.5rem;
-		flex-shrink: 0;
-	}
-	.plot-nav a {
-		font-size: 0.8rem;
-		color: #555;
-		text-decoration: none;
-		border: 1px solid var(--color-border);
-		border-radius: 999px;
-		padding: 0.3rem 0.75rem;
-		background: white;
-		transition: border-color 0.15s, color 0.15s;
-	}
-	.plot-nav a:hover {
-		border-color: var(--color-primary);
-		color: var(--color-primary);
 	}
 	.top-split {
 		display: grid;
