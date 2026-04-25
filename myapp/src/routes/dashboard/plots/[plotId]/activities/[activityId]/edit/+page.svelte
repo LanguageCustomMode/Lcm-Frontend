@@ -62,6 +62,14 @@
 		}
 	};
 
+	const exitEdit = async () => {
+		if (data.plot?.id) {
+			await goto(`/dashboard/plots/${data.plot.id}/activities/${$page.params.activityId}`);
+			return;
+		}
+		await goto('/dashboard');
+	};
+
 	const generateCards = async () => {
 		if (!activity || generating) return;
 		generating = true;
@@ -101,7 +109,10 @@
 	onMount(loadActivity);
 </script>
 
-<h1>Edit Activity</h1>
+<div class="page-header">
+	<h1>Edit Activity</h1>
+	<button type="button" class="exit" onclick={exitEdit}>Exit</button>
+</div>
 {#if error}
 	<p class="error">{error}</p>
 {/if}
@@ -152,6 +163,28 @@
 <style>
 	.error {
 		color: #b42318;
+	}
+
+	.page-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.exit {
+		border: 1px solid #2f6a3f;
+		background: #3f8a52;
+		color: #fff;
+		border-radius: 999px;
+		padding: 0.35rem 0.8rem;
+		font-size: 0.8rem;
+		cursor: pointer;
+	}
+
+	.exit:hover {
+		background: #347444;
+		border-color: #275a35;
 	}
 
 	.generate-panel {
