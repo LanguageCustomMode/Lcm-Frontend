@@ -5,6 +5,7 @@
 	import AudiocardReviewFlow from '$lib/components/flows/AudiocardReviewFlow.svelte';
 	import McqReviewFlow from '$lib/components/flows/McqReviewFlow.svelte';
 	import ConversationFlow from '$lib/components/flows/ConversationFlow.svelte';
+	import DialogueChatFlow from '$lib/components/flows/DialogueChatFlow.svelte';
 	import WritingChatFlow from '$lib/components/flows/WritingChatFlow.svelte';
 	import ReadingChatFlow from '$lib/components/flows/ReadingChatFlow.svelte';
 	import type { FlowType } from '$lib/types';
@@ -15,6 +16,7 @@
 		audiocard_review: 'Listening',
 		mcq_review: 'MCQ',
 		conversation: 'Practice',
+		dialogue_chat: 'Dialogue',
 		writing_chat: 'Writing',
 		reading_chat: 'Reading',
 		tutor_chat: 'Tutor'
@@ -42,6 +44,8 @@
 	<McqReviewFlow {activity} />
 {:else if flowType === 'conversation' || flowType === 'tutor_chat'}
 	<ConversationFlow {activity} />
+{:else if flowType === 'dialogue_chat'}
+	<DialogueChatFlow {activity} />
 {:else if flowType === 'writing_chat'}
 	<WritingChatFlow {activity} />
 {:else if flowType === 'reading_chat'}

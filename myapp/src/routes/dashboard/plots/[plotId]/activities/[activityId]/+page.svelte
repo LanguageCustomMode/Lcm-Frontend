@@ -13,6 +13,7 @@
 		audiocard_review: 'Listening',
 		mcq_review: 'MCQ',
 		conversation: 'Practice',
+		dialogue_chat: 'Dialogue',
 		writing_chat: 'Writing',
 		reading_chat: 'Reading',
 		tutor_chat: 'Tutor'
