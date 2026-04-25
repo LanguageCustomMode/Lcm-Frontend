@@ -76,6 +76,10 @@
 		display: grid;
 		gap: 1.5rem;
 		border-right: 1px solid var(--color-border);
+		position: sticky;
+		top: 0;
+		height: 100vh;
+		overflow-y: auto;
 	}
 
 	.brand h2 {

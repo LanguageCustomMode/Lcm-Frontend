@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 
 	let { data } = $props();
 
@@ -37,6 +37,7 @@
 			});
 			if (!res.ok) throw new Error(await res.text());
 			const payload = await res.json();
+			if (data.plot?.id) await invalidate(`app:plot:${data.plot.id}`);
 			const params = new URLSearchParams({ conversation_id: payload.conversation_id });
 			await goto(`/dashboard/plots/${data.plot?.id}/design?${params.toString()}`);
 		} catch (err) {

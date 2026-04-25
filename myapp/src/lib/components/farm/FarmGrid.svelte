@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Activity } from '$lib/types';
 	import ActivityTile from '$lib/components/farm/ActivityTile.svelte';
+	import { invalidate } from '$app/navigation';
 
 	interface Props {
 		rows: number;
@@ -154,6 +155,7 @@
 			body: JSON.stringify({ grid_positions: newPositions })
 		});
 
+		if (plotId) await invalidate(`app:plot:${plotId}`);
 		onactivitymoved?.();
 	}
 

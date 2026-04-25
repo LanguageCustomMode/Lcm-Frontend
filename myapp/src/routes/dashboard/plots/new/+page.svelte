@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 	import { apiPost } from '$lib/api';
 	import Input from '$lib/components/ui/Input.svelte';
 	import Textarea from '$lib/components/ui/Textarea.svelte';
@@ -19,6 +19,7 @@
 			const plot = await apiPost<{ id: string }>('/plots', {
 				name, l2_target, proficiency, description
 			});
+			await invalidate('app:dashboard-plots');
 			goto(`/dashboard/plots/${plot.id}`);
 		} catch (e: any) {
 			error = e.detail || e.message;

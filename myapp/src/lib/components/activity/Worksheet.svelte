@@ -6,7 +6,11 @@
 		role: 'user' | 'assistant' | 'system';
 		content: string;
 		kind?: 'question' | 'commentary';
+		id?: number;
 	}
+
+	let nextMessageId = 0;
+	const withId = (m: VisibleMessage): VisibleMessage => ({ ...m, id: nextMessageId++ });
 
 	interface InitialState {
 		session_id: string;
@@ -48,9 +52,9 @@
 			if (!res.ok) throw new Error(await res.text());
 			const payload = await res.json();
 			sessionId = payload.session_id;
-			messages = (payload.messages ?? []).filter(
-				(m: VisibleMessage) => m.role !== 'system'
-			);
+			messages = (payload.messages ?? [])
+				.filter((m: VisibleMessage) => m.role !== 'system')
+				.map(withId);
 			questionsAsked = payload.questions_asked ?? 0;
 			maxQuestions = payload.max_questions ?? 10;
 			complete = !!payload.complete;
@@ -67,7 +71,7 @@
 		const text = answer.trim();
 		answer = '';
 		error = null;
-		messages = [...messages, { role: 'user', content: text }];
+		messages = [...messages, withId({ role: 'user', content: text })];
 		loading = true;
 		await scrollToBottom();
 
@@ -84,14 +88,14 @@
 				if (event.event === 'token') {
 					messages = [
 						...messages,
-						{ role: 'assistant', content: event.data, kind: 'commentary' }
+						withId({ role: 'assistant', content: event.data, kind: 'commentary' })
 					];
 					await scrollToBottom();
 				}
 				if (event.event === 'question') {
 					messages = [
 						...messages,
-						{ role: 'assistant', content: event.data, kind: 'question' }
+						withId({ role: 'assistant', content: event.data, kind: 'question' })
 					];
 					await scrollToBottom();
 				}
@@ -126,7 +130,7 @@
 	onMount(() => {
 		if (initialState) {
 			sessionId = initialState.session_id;
-			messages = (initialState.messages ?? []).filter((m) => m.role !== 'system');
+			messages = (initialState.messages ?? []).filter((m) => m.role !== 'system').map(withId);
 			questionsAsked = initialState.questions_asked ?? 0;
 			maxQuestions = initialState.max_questions ?? 10;
 			complete = !!initialState.complete;
@@ -151,7 +155,7 @@
 	{/if}
 
 	<div class="stream" bind:this={scrollEl}>
-		{#each messages as msg (msg.content + (msg.kind ?? '') + msg.role)}
+		{#each messages as msg (msg.id)}
 			<div class="turn turn-{msg.role} turn-kind-{msg.kind ?? 'plain'}">
 				{#if msg.role === 'assistant' && msg.kind === 'question'}
 					<div class="question">{msg.content}</div>

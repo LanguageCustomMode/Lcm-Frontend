@@ -16,6 +16,12 @@
 			Grid
 		</a>
 		<a
+			href="/dashboard/plots/{data.plot?.id}/references"
+			class:active={isActive(`/dashboard/plots/${data.plot?.id}/references`)}
+		>
+			References
+		</a>
+		<a
 			href="/dashboard/plots/{data.plot?.id}/settings"
 			class:active={isActive(`/dashboard/plots/${data.plot?.id}/settings`)}
 		>

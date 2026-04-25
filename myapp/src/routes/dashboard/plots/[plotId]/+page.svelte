@@ -5,7 +5,7 @@
 	import QuickCreatePanel from '$lib/components/plot/QuickCreatePanel.svelte';
 	import Modal from '$lib/components/ui/Modal.svelte';
 	import type { PlotDetail } from '$lib/types';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 
 	let { data } = $props();
 
@@ -35,11 +35,11 @@
 
 	const handleQuickCreated = async () => {
 		quickCreateOpen = false;
-		await invalidateAll();
+		if (data.plot?.id) await invalidate(`app:plot:${data.plot.id}`);
 	};
 
 	const handleActivityMoved = async () => {
-		await invalidateAll();
+		if (data.plot?.id) await invalidate(`app:plot:${data.plot.id}`);
 	};
 </script>
 

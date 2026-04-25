@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { invalidate } from '$app/navigation';
+
 	let { data } = $props();
 
 	type ReferenceDoc = { id: string; title: string; status: string; chunk_count?: number };
@@ -64,6 +66,7 @@
 			text = '';
 			file = null;
 			await loadReferences();
+			await invalidate(`app:plot:${data.plot.id}`);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to upload reference';
 		} finally {
@@ -80,6 +83,7 @@
 				selected = null;
 				searchResults = [];
 			}
+			if (data.plot) await invalidate(`app:plot:${data.plot.id}`);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to delete reference';
 		}
@@ -105,8 +109,12 @@
 	});
 </script>
 
-<h1>References</h1>
-<p>Upload reference texts for RAG-powered content generation.</p>
+<div class="plot-header">
+	<div>
+		<h1>References</h1>
+		<span class="plot-desc">Upload reference texts for RAG-powered content generation.</span>
+	</div>
+</div>
 
 <div class="layout">
 	<section class="panel">
@@ -171,6 +179,22 @@
 </div>
 
 <style>
+	.plot-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+	.plot-header h1 {
+		font-family: 'Nunito', 'Trebuchet MS', 'Segoe UI', sans-serif;
+		font-weight: 700;
+	}
+	.plot-desc {
+		font-size: 0.8rem;
+		color: #666;
+		margin-top: 0.25rem;
+	}
 	.layout {
 		display: grid;
 		gap: 1.5rem;
@@ -183,6 +207,14 @@
 		padding: 1.2rem;
 		display: grid;
 		gap: 0.6rem;
+	}
+
+	.panel h2 {
+		font-size: 0.85rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #4a7c59;
+		margin: 0;
 	}
 
 	label {

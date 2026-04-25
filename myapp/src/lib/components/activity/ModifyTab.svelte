@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { ContentType, ContentPayload } from '$lib/types';
 	import { onMount } from 'svelte';
+	import { page as appPage } from '$app/stores';
+	import { invalidate } from '$app/navigation';
 
 	interface Props {
 		activityId: string;
@@ -119,6 +121,8 @@
 			messages = [];
 			draftContent = null;
 			await loadSession();
+			const plotId = $appPage.params.plotId;
+			if (plotId) await invalidate(`app:plot:${plotId}`);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to apply';
 		}
