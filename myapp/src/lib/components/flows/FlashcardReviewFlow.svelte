@@ -196,7 +196,6 @@
 	});
 </script>
 
-<h1>{title}</h1>
 {#if error}
 	<p class="error">{error}</p>
 {/if}

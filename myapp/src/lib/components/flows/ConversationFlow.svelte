@@ -13,7 +13,6 @@
 	onMount(() => { chat.startSession(); });
 </script>
 
-<h1>Practice</h1>
 {#if chat.error}
 	<p class="error">{chat.error}</p>
 {/if}

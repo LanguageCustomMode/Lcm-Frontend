@@ -171,8 +171,14 @@
 	.page-header {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
-		gap: 0.75rem;
+		align-items: flex-start;
+		gap: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.page-header h1 {
+		font-family: 'Nunito', 'Trebuchet MS', 'Segoe UI', sans-serif;
+		font-weight: 700;
 	}
 
 	.exit {
@@ -201,8 +207,11 @@
 	}
 
 	.generate-panel h3 {
-		font-size: 0.9rem;
-		font-weight: 600;
+		font-size: 0.85rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #4a7c59;
+		margin: 0;
 	}
 
 	.generate-row {

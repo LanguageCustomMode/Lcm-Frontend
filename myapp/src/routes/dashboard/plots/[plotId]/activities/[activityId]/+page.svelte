@@ -80,17 +80,16 @@
 	onMount(loadActivity);
 </script>
 
-<h1>Activity Detail</h1>
 {#if error}
 	<p class="error">{error}</p>
 {/if}
 {#if loading}
 	<p>Loading activity...</p>
 {:else if activity}
-	<div class="activity-summary">
+	<div class="plot-header">
 		<div>
-			<h2>{activity.name}</h2>
-			<p class="meta">{activity.type.replace(/_/g, ' ')}</p>
+			<h1>{activity.name}</h1>
+			<p class="plot-desc">{activity.type.replace(/_/g, ' ')}</p>
 		</div>
 		<div class="actions">
 			{#each activity.supported_flows ?? [] as flow}
@@ -163,17 +162,21 @@
 {/if}
 
 <style>
-	.activity-summary {
+	.plot-header {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
+		align-items: flex-start;
 		gap: 1rem;
 		margin-bottom: 1rem;
 	}
-
-	.meta {
+	.plot-header h1 {
+		font-family: 'Nunito', 'Trebuchet MS', 'Segoe UI', sans-serif;
+		font-weight: 700;
+	}
+	.plot-desc {
 		font-size: 0.8rem;
 		color: #666;
+		margin-top: 0.25rem;
 	}
 
 	.actions {
