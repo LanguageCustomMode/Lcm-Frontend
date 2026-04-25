@@ -14,8 +14,18 @@
 	let quickCreateRow = $state(0);
 	let quickCreateCol = $state(0);
 
+	// Calculate max activities based on player level
+	// Level 1-4: 6 activities
+	// Level 5-9: 11 activities
+	// Level 10-14: 16 activities, etc.
+	const maxActivities = $derived(() => {
+		const level = data.gamification?.level ?? 1;
+		return 6 + 5 * Math.floor(level / 5);
+	});
+
 	const handleCellClick = (row: number, col: number) => {
 		if (!data.plot) return;
+		if (!canCreateActivity()) return;
 		quickCreateRow = row;
 		quickCreateCol = col;
 		quickCreateOpen = true;
@@ -41,6 +51,12 @@
 	const handleActivityMoved = async () => {
 		await invalidateAll();
 	};
+
+	// Check if user can create more activities
+	const canCreateActivity = $derived(() => {
+		const activityCount = data.plot?.activities?.length ?? 0;
+		return activityCount < maxActivities();
+	});
 </script>
 
 <div class="plot-header">
@@ -60,6 +76,8 @@
 					plotId={data.plot.id}
 					row={quickCreateRow}
 					col={quickCreateCol}
+					maxActivitySlots={maxActivities()}
+					activityCount={data.plot.activities?.length ?? 0}
 					onclose={() => (quickCreateOpen = false)}
 					oncreated={handleQuickCreated}
 				/>
@@ -72,6 +90,8 @@
 				cols={data.plot.grid_cols}
 				activities={data.plot.activities ?? []}
 				plotId={data.plot.id}
+				userLevel={data.gamification?.level ?? 1}
+				maxActivitySlots={maxActivities()}
 				oncellclick={handleCellClick}
 				onactivityclick={handleActivityClick}
 				onactivitymoved={handleActivityMoved}

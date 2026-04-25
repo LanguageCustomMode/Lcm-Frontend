@@ -22,11 +22,13 @@
 		plotId: string;
 		row: number;
 		col: number;
+		maxActivitySlots?: number;
+		activityCount?: number;
 		onclose?: () => void;
 		oncreated?: (activityId: string) => void;
 	}
 
-	let { plotId, row, col, onclose, oncreated }: Props = $props();
+	let { plotId, row, col, maxActivitySlots, activityCount = 0, onclose, oncreated }: Props = $props();
 
 	let wishlist = $state<WishlistItem[]>([]);
 	let references = $state<RagSource[]>([]);
@@ -74,6 +76,10 @@
 	const submit = async () => {
 		if (!title.trim()) {
 			error = 'Title is required';
+			return;
+		}
+		if (maxActivitySlots && activityCount >= maxActivitySlots) {
+			error = `You've reached your activity limit of ${maxActivitySlots}. Level up to create more!`;
 			return;
 		}
 		saving = true;
@@ -189,7 +195,7 @@
 		{#if error}<p class="error">{error}</p>{/if}
 		<div class="actions">
 			<button type="button" class="ghost" onclick={() => onclose?.()}>Cancel</button>
-			<button type="button" disabled={saving} onclick={submit}>
+			<button type="button" disabled={saving || (maxActivitySlots && activityCount >= maxActivitySlots)} onclick={submit}>
 				{saving ? 'Creating…' : 'Create activity'}
 			</button>
 		</div>
