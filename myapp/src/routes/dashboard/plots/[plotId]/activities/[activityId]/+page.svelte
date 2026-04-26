@@ -36,6 +36,8 @@
 		messages: { role: 'user' | 'assistant' | 'system'; content: string; kind?: 'question' | 'commentary' }[];
 		questions_asked: number;
 		max_questions: number;
+		min_questions?: number;
+		answers_count?: number;
 		complete: boolean;
 	}
 
@@ -119,6 +121,14 @@
 		generating = false;
 	};
 
+	const handleWorksheetComplete = (state: WorksheetInitialState) => {
+		worksheetState = {
+			...(worksheetState ?? state),
+			...state,
+			complete: true
+		};
+	};
+
 	$effect(() => {
 		if (worksheetComplete && activity && pollStartedFor !== activity.id) {
 			pollStartedFor = activity.id;
@@ -191,7 +201,11 @@
 
 	{#if activeTab === 'overview'}
 		{#if hasWorksheet && !worksheetComplete}
-			<Worksheet activityId={activity.id} initialState={worksheetState} />
+			<Worksheet
+				activityId={activity.id}
+				initialState={worksheetState}
+				onComplete={handleWorksheetComplete}
+			/>
 		{/if}
 		<details class="browser-details" open={generatedContentOpen}>
 			<summary>

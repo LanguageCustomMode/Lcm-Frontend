@@ -17,6 +17,8 @@
 		messages: VisibleMessage[];
 		questions_asked: number;
 		max_questions: number;
+		min_questions?: number;
+		answers_count?: number;
 		complete: boolean;
 	}
 
@@ -24,19 +26,24 @@
 		activityId: string;
 		initialState?: InitialState | null;
 		disabled?: boolean;
+		onComplete?: (state: InitialState) => void;
 	}
 
-	let { activityId, initialState = null, disabled = false }: Props = $props();
+	let { activityId, initialState = null, disabled = false, onComplete }: Props = $props();
 
 	let sessionId = $state<string | null>(null);
 	let messages = $state<VisibleMessage[]>([]);
 	let questionsAsked = $state(0);
 	let maxQuestions = $state(10);
+	let minQuestions = $state(3);
+	let answersCount = $state(0);
 	let complete = $state(false);
 	let answer = $state('');
 	let loading = $state(false);
+	let completing = $state(false);
 	let error = $state<string | null>(null);
 	let scrollEl = $state<HTMLDivElement | null>(null);
+	const canCompleteEarly = $derived(!complete && !disabled && answersCount >= minQuestions);
 
 	const scrollToBottom = async () => {
 		await tick();
@@ -57,6 +64,8 @@
 				.map(withId);
 			questionsAsked = payload.questions_asked ?? 0;
 			maxQuestions = payload.max_questions ?? 10;
+			minQuestions = payload.min_questions ?? 3;
+			answersCount = payload.answers_count ?? 0;
 			complete = !!payload.complete;
 			await scrollToBottom();
 		} catch (err) {
@@ -67,7 +76,7 @@
 	};
 
 	const submitAnswer = async () => {
-		if (!sessionId || !answer.trim() || loading || complete || disabled) return;
+		if (!sessionId || !answer.trim() || loading || completing || complete || disabled) return;
 		const text = answer.trim();
 		answer = '';
 		error = null;
@@ -107,6 +116,11 @@
 							questionsAsked = payload.questions_asked;
 						if (typeof payload?.max_questions === 'number')
 							maxQuestions = payload.max_questions;
+						if (typeof payload?.min_questions === 'number')
+							minQuestions = payload.min_questions;
+						if (typeof payload?.answers_count === 'number')
+							answersCount = payload.answers_count;
+						if (payload?.complete) onComplete?.(payload);
 					} catch {
 						/* ignore */
 					}
@@ -117,6 +131,29 @@
 		} finally {
 			loading = false;
 			await scrollToBottom();
+		}
+	};
+
+	const completeEarly = async () => {
+		if (!sessionId || loading || completing || complete || disabled || !canCompleteEarly) return;
+		error = null;
+		completing = true;
+		try {
+			const res = await fetch(`/api/llm/worksheet/${sessionId}/complete`, {
+				method: 'POST'
+			});
+			if (!res.ok) throw new Error(await res.text());
+			const payload = await res.json();
+			questionsAsked = payload.questions_asked ?? questionsAsked;
+			maxQuestions = payload.max_questions ?? maxQuestions;
+			minQuestions = payload.min_questions ?? minQuestions;
+			answersCount = payload.answers_count ?? answersCount;
+			complete = !!payload.complete;
+			onComplete?.(payload);
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'Failed to complete worksheet';
+		} finally {
+			completing = false;
 		}
 	};
 
@@ -133,6 +170,8 @@
 			messages = (initialState.messages ?? []).filter((m) => m.role !== 'system').map(withId);
 			questionsAsked = initialState.questions_asked ?? 0;
 			maxQuestions = initialState.max_questions ?? 10;
+			minQuestions = initialState.min_questions ?? 3;
+			answersCount = initialState.answers_count ?? 0;
 			complete = !!initialState.complete;
 			scrollToBottom();
 			return;
@@ -185,12 +224,21 @@
 		<textarea
 			bind:value={answer}
 			placeholder="Your answer (⌘/Ctrl+Enter to submit)"
-			disabled={loading || complete || disabled}
+			disabled={loading || completing || complete || disabled}
 			onkeydown={handleKeydown}
 			rows="3"
 		></textarea>
 		<div class="actions">
-			<button type="button" disabled={loading || !answer.trim() || disabled} onclick={submitAnswer}>
+			<button
+				type="button"
+				class="secondary"
+				disabled={loading || completing || !canCompleteEarly}
+				title={canCompleteEarly ? 'Generate content from these answers' : `Available after ${minQuestions} answers`}
+				onclick={completeEarly}
+			>
+				{completing ? 'Starting…' : 'Skip to generation'}
+			</button>
+			<button type="button" disabled={loading || completing || !answer.trim() || disabled} onclick={submitAnswer}>
 				{loading ? 'Sending…' : 'Submit answer'}
 			</button>
 		</div>
@@ -272,6 +320,7 @@
 	}
 	.actions {
 		display: flex;
+		gap: 0.5rem;
 		justify-content: flex-end;
 	}
 	.actions button {
@@ -282,6 +331,10 @@
 		padding: 0.4rem 1rem;
 		font-size: 0.85rem;
 		cursor: pointer;
+	}
+	.actions button.secondary {
+		background: white;
+		color: #355e42;
 	}
 	.actions button:disabled {
 		opacity: 0.5;
